@@ -1,0 +1,25 @@
+{
+    "name": "obsidian-better-vim",
+    "version": "1.0.0",
+    "description": "Fixes some annoyances with obsidians vim mode.",
+    "main": "main.js",
+    "scripts": {
+        "dev": "node esbuild.config.mjs",
+        "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production"
+    },
+    "keywords": [],
+    "author": "Nils Goeke",
+    "license": "MIT",
+    "devDependencies": {
+        "@codemirror/state": "^6.5.4",
+        "@codemirror/view": "^6.39.13",
+        "@types/node": "^25.2.3",
+        "@typescript-eslint/eslint-plugin": "8.55.0",
+        "@typescript-eslint/parser": "8.55.0",
+        "builtin-modules": "5.0.0",
+        "esbuild": "0.27.3",
+        "obsidian": "latest",
+        "tslib": "2.8.1",
+        "typescript": "5.9.3"
+    }
+}

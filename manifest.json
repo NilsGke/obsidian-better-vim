@@ -1,0 +1,10 @@
+{
+    "id": "better-vim",
+    "name": "BetterVim",
+    "version": "1.0.0",
+    "minAppVersion": "0.15.0",
+    "description": "Fix some annoyances with obsidians vim mode",
+    "author": "Nils Goeke",
+    "authorUrl": "https://github.com/NilsGke",
+    "isDesktopOnly": true
+}
