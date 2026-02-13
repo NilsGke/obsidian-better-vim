@@ -1,28 +1,42 @@
 import { Plugin } from "obsidian";
-import { patchListNewLine } from "./patches/listNewLine";
+import { Patch } from "./types";
+import { listNewLine } from "./patches/listNewLine";
 
 export default class VimYankHighlightPlugin extends Plugin {
-    initialized = false;
+    private patched = false;
 
-    async onload() {
-        if (this.initialized) return;
+    private patches: Patch[] = [listNewLine];
 
+    onload() {
         this.registerEvent(
             this.app.workspace.on("active-leaf-change", () =>
                 this.initialize(),
             ),
         );
 
-        this.initialized = true;
+        this.initialize();
     }
 
     private initialize() {
+        if (this.patched) return;
+
         const vim = window.CodeMirrorAdapter?.Vim;
         if (!vim) {
-            console.error("vim is not avalible (vim mode probably disabled)");
+            console.error(
+                "better-vim cannot initialize! Vim is not avalible (vim mode probably disabled).",
+            );
             return;
         }
 
-        patchListNewLine(vim);
+        this.patches.forEach(({ patch }) => patch(vim));
+
+        this.patched = true;
+    }
+
+    onunload(): void {
+        const vim = window.CodeMirrorAdapter?.Vim;
+        if (!vim) return;
+
+        this.patches.forEach(({ unpatch }) => unpatch(vim));
     }
 }

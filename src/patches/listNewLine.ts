@@ -1,6 +1,7 @@
-import { Vim, VimActionArgs, VimCodeMirrorAdapter } from "src/types";
+import { Patch } from "src/types";
+import { Vim, VimActionArgs, VimCodeMirrorAdapter } from "src/vimTypes";
 
-export function patchListNewLine(vim: Vim) {
+function patchListNewLine(vim: Vim) {
     const insertLine = (
         codeMirrorAdapter: VimCodeMirrorAdapter,
         actionArgs: VimActionArgs,
@@ -94,3 +95,13 @@ export function patchListNewLine(vim: Vim) {
         { context: "normal" },
     );
 }
+
+function unpatchListNewLine(vim: Vim) {
+    vim.unmap("o", "normal");
+    vim.unmap("O", "normal");
+}
+
+export const listNewLine: Patch = {
+    patch: patchListNewLine,
+    unpatch: unpatchListNewLine,
+};
