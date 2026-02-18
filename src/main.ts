@@ -1,7 +1,7 @@
 import { Plugin } from "obsidian";
 import { patches, patchesMap } from "./patches";
 import { DEFAULT_SETTINGS, Settings, SettingsTab } from "./settings";
-import { typeSafeObjectEntries } from "./utils";
+import { typeSafeObjectEntries } from "./util";
 
 export default class VimYankHighlightPlugin extends Plugin {
     private patched = false;

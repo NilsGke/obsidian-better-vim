@@ -62,8 +62,10 @@ function patchListNewLine(vim: Vim) {
             selection: {
                 anchor:
                     direction === "below"
-                        ? insertPos + insertText.split("\n")[1]!.length
-                        : insertPos + insertText.split("\n")[0]!.length,
+                        ? // end of line plus length of next new line plus 1 (new line character)
+                          line.to + insertText.split("\n")[1]!.length + 1
+                        : // beginning of line plus length of new line
+                          line.from + insertText.split("\n")[0]!.length,
             },
         });
 
