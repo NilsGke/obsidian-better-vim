@@ -1,13 +1,18 @@
 import { Plugin } from "obsidian";
-import { Patch } from "./types";
-import { listNewLine } from "./patches/listNewLine";
+import { patches, patchesMap } from "./patches";
+import { DEFAULT_SETTINGS, Settings, SettingsTab } from "./settings";
+import { typeSafeObjectEntries } from "./utils";
 
 export default class VimYankHighlightPlugin extends Plugin {
     private patched = false;
+    // extend to generic string boolean pair because old settings might exist
+    settings: Settings & { [key: string]: boolean };
+    vim = window.CodeMirrorAdapter.Vim;
 
-    private patches: Patch[] = [listNewLine];
+    async onload() {
+        await this.loadSettings();
+        this.addSettingsUI();
 
-    onload() {
         this.registerEvent(
             this.app.workspace.on("active-leaf-change", () =>
                 this.initialize(),
@@ -28,7 +33,11 @@ export default class VimYankHighlightPlugin extends Plugin {
             return;
         }
 
-        this.patches.forEach(({ patch }) => patch(vim));
+        typeSafeObjectEntries(this.settings).forEach(([key, enabled]) => {
+            if (!(key in patchesMap)) return;
+            const patchName = key as keyof typeof patchesMap;
+            if (enabled) patchesMap[patchName].patch(vim);
+        });
 
         this.patched = true;
     }
@@ -37,6 +46,22 @@ export default class VimYankHighlightPlugin extends Plugin {
         const vim = window.CodeMirrorAdapter?.Vim;
         if (!vim) return;
 
-        this.patches.forEach(({ unpatch }) => unpatch(vim));
+        patches.forEach(({ unpatch }) => unpatch(vim));
+    }
+
+    async loadSettings() {
+        this.settings = Object.assign(
+            {},
+            DEFAULT_SETTINGS,
+            await this.loadData(),
+        );
+    }
+
+    async saveSettings() {
+        await this.saveData(this.settings);
+    }
+
+    addSettingsUI() {
+        this.addSettingTab(new SettingsTab(this.app, this, this.vim));
     }
 }
