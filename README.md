@@ -10,6 +10,10 @@ This plugin fixes some annoyances with obsidians built in vim mode.
 
 If you miss a feature or have a annoyance, please open a issue.
 
+## Plans:
+
+- I intend to integrate something like [nvim-mini/mini.surround](https://github.com/nvim-mini/mini.surround)
+
 ## Installation
 
 ### Community Plugins
