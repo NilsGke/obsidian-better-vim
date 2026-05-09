@@ -8,28 +8,41 @@ on:
 jobs:
     build:
         runs-on: ubuntu-latest
+
         permissions:
             contents: write
+
         steps:
-            - uses: actions/checkout@v3
+            - name: Checkout repository
+              uses: actions/checkout@v4
 
-            - name: Use Node.js
-              uses: actions/setup-node@v3
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
               with:
-                  node-version: "18.x"
+                  node-version: 20
+                  cache: "pnpm"
 
-            - name: Build plugin
+            - name: Enable Corepack (pnpm)
+              run: corepack enable
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Build plugin (esbuild)
+              run: pnpm run build
+
+            - name: Extract tag
+              id: tag
               run: |
-                  npm install
-                  npm run build
+                  TAG="${GITHUB_REF#refs/tags/}"
+                  TAG="${TAG#v}"
+                  echo "tag=$TAG" >> $GITHUB_OUTPUT
 
             - name: Create release
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
-                  tag="${GITHUB_REF#refs/tags/}"
-
-                  gh release create "$tag" \
-                    --title="$tag" \
+                  gh release create "${{ steps.tag.outputs.tag }}" \
+                    --title "${{ steps.tag.outputs.tag }}" \
                     --draft \
-                    main.js manifest.json
+                    main.js manifest.json styles.css
