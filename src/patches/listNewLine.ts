@@ -16,10 +16,11 @@ function patchListNewLine(vim: Vim) {
         const line = state.doc.lineAt(pos);
         const lineText = line.text;
 
+        const indentMatch = lineText.match(/^(\s*)/);
+        const indent = indentMatch?.[1] ?? "";
+
         const bulletMatch = lineText.match(/^(\s*)([-*+])\s+/);
         const numberMatch = lineText.match(/^(\s*)(\d+)([.)])\s+/);
-
-        const indent = bulletMatch?.[1] ?? numberMatch?.[1] ?? "";
 
         let insertPos: number;
         if (direction === "below") {
@@ -32,6 +33,7 @@ function patchListNewLine(vim: Vim) {
 
         let insertText = "";
         if (numberMatch) {
+            // number
             const num = parseInt(numberMatch[2]);
             const delim = numberMatch[3];
             for (let i = 0; i < repeat; i++)
@@ -40,18 +42,25 @@ function patchListNewLine(vim: Vim) {
                 } else {
                     insertText += `${indent}${Math.max(1, num - 1)}${delim} \n`;
                 }
-        } else {
-            // handles bulletMatch or no match
+        } else if (bulletMatch) {
+            // bullet point
+            const bullet = bulletMatch[2] ?? "";
+            const prefix = indent + bullet;
 
-            const bullet = bulletMatch?.[2] ?? "";
-            const prefix = `${indent}${bullet} `;
-
-            if (direction === "below") {
+            if (direction === "below")
                 insertText = `\n${prefix} `.repeat(repeat);
-            } else {
+            else {
                 insertText = `${prefix} \n`.repeat(repeat);
             }
+        } else {
+            // normal newline insert
+            if (direction === "below")
+                insertText = `\n${indent}`.repeat(repeat);
+            else {
+                insertText = `${indent}\n`.repeat(repeat);
+            }
         }
+        console.log({ insertText });
 
         view.dispatch({
             changes: {
