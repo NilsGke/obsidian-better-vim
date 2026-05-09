@@ -48,5 +48,4 @@ jobs:
               run: |
                   gh release create "${{ steps.tag.outputs.tag }}" \
                     --title "${{ steps.tag.outputs.tag }}" \
-                    --draft \
                     main.js manifest.json styles.css
