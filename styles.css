@@ -1,0 +1,33 @@
+@keyframes yankedHighlight {
+    0% {
+        color: var(--text-on-accent);
+        background-color: hsl(
+            var(--accent-h),
+            var(--accent-s),
+            var(--accent-l),
+            0.6
+        );
+    }
+    50% {
+        color: var(--text-on-accent);
+        background-color: hsl(
+            var(--accent-h),
+            var(--accent-s),
+            var(--accent-l),
+            0.6
+        );
+    }
+
+    100% {
+        background-color: transparent;
+    }
+}
+
+.ovy-highlight {
+    --expected-text-height: calc(var(--line-height) * var(--font-text-size));
+    --approximate-gap-height: calc(
+        (var(--expected-text-height) - var(--font-text-size)) / 4
+    );
+    padding: var(--approximate-gap-height) 0;
+    animation: yankedHighlight 0.4s ease-out;
+}

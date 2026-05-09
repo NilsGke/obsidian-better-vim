@@ -36,8 +36,10 @@ export class SettingsTab extends PluginSettingTab {
                     .setDesc(patchesMap[key].description)
                     .addToggle((toggle) =>
                         toggle.setValue(value).onChange(async (value) => {
-                            if (value) patchesMap[key].patch(this.#vim);
-                            else patchesMap[key].unpatch(this.#vim);
+                            if (value)
+                                patchesMap[key].patch(this.#vim, this.plugin);
+                            else
+                                patchesMap[key].unpatch(this.#vim, this.plugin);
 
                             this.plugin.settings[key] = value;
                             await this.plugin.saveSettings();

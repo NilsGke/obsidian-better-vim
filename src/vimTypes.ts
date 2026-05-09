@@ -51,6 +51,13 @@ export interface VimState {
 export interface VimRegisterController {
     getRegister(name: string): any;
     setRegister(name: string, value: any): void;
+    pushText(
+        registerName: string,
+        operator: string,
+        text: string,
+        isVisual: boolean,
+        lines: string[],
+    ): void;
     [key: string]: any;
 }
 
