@@ -3,7 +3,7 @@
     "name": "Better Vim",
     "version": "1.0.0",
     "minAppVersion": "0.15.0",
-    "description": "Fix some annoyances with obsidians vim mode.",
+    "description": "Fixes some annoyances with obsidians built in vim mode.",
     "author": "Nils Goeke",
     "authorUrl": "https://github.com/NilsGke"
 }

@@ -1,6 +1,14 @@
 # Obsidian BetterVim
 
-This plugin fixes some annoyances with the vim mode.
+This plugin fixes some annoyances with obsidians built in vim mode.
+
+## Features:
+
+- Vim yank highlight (inspired by [aleksey-rowan/obsidian-vim-yank-highlight](https://github.com/aleksey-rowan/obsidian-vim-yank-highlight))
+- insert bullet point on new line
+- yank to clipboard
+
+If you miss a feature or have a annoyance, please open a issue.
 
 ## Installation
 
@@ -8,7 +16,7 @@ This plugin fixes some annoyances with the vim mode.
 
 1. Open Obsidian.
 2. Go to "Settings" > "Community plugins."
-3. Search for "BetterVim"
+3. Search for "Better Vim"
 4. Click "Install" to enable the plugin.
 
 ### Manual Installation
