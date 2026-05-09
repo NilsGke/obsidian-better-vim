@@ -6,24 +6,20 @@ import {
 import { Patch } from "src/types";
 import { Vim } from "src/vimTypes";
 import BetterVimPlugin from "src/main";
-import { MarkViewPlugin, markViewPlugin } from "src/markViewPlugin";
+import { markViewPlugin } from "src/markViewPlugin";
 
 let plugin: BetterVimPlugin | null = null;
 let timeoutHandle = 0;
 
 const handler = ({
-    detail: { registerName, operator, text, isVisual, lines, vim, plugin },
+    detail: { operator, text, plugin },
 }: CustomEvent<YankEventDetail>) => {
     if (operator !== "yank") return;
-
-    console.log({ registerName, operator, text, isVisual, lines, plugin });
 
     const plug = plugin.activeEditorView.plugin(markViewPlugin);
     if (!plug) throw Error("could not load mark view plugin");
 
     plug.setYankText(text, plugin.activeEditorView);
-
-    console.log(plug);
 
     const timeoutEditorView = plugin.activeEditorView;
     clearTimeout(timeoutHandle);
@@ -32,12 +28,12 @@ const handler = ({
     }, 500);
 };
 
-function patch(vim: Vim, _plugin: BetterVimPlugin) {
+function patch(_vim: Vim, _plugin: BetterVimPlugin) {
     plugin = _plugin;
     addYankEventListener(handler);
 }
 
-function unpatch(vim: Vim, plugin: BetterVimPlugin) {
+function unpatch(_vim: Vim, _plugin: BetterVimPlugin) {
     removeYankEventListener(handler);
 }
 
