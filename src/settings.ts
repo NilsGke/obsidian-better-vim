@@ -7,10 +7,7 @@ import { Vim } from "./vimTypes";
 export type Settings = Record<keyof typeof patchesMap, boolean>;
 
 export const DEFAULT_SETTINGS = Object.fromEntries(
-    Object.keys(patchesMap).map((name: keyof typeof patchesMap) => [
-        name satisfies keyof Settings,
-        true,
-    ]),
+    typeSafeObjectEntries(patchesMap).map(([name]) => [name, true] as const),
 ) as Settings;
 
 export class SettingsTab extends PluginSettingTab {
@@ -30,7 +27,7 @@ export class SettingsTab extends PluginSettingTab {
 
         typeSafeObjectEntries(this.plugin.settings)
             .filter(([key]) => key in patchesMap)
-            .forEach(([key, value]: [keyof typeof patchesMap, boolean]) =>
+            .forEach(([key, value]: [keyof typeof patchesMap, boolean]) => {
                 new Setting(containerEl)
                     .setName(key.replaceAll("-", " "))
                     .setDesc(patchesMap[key].description)
@@ -44,7 +41,7 @@ export class SettingsTab extends PluginSettingTab {
                             this.plugin.settings[key] = value;
                             await this.plugin.saveSettings();
                         }),
-                    ),
-            );
+                    );
+            });
     }
 }

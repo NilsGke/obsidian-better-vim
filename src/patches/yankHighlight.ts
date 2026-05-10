@@ -8,13 +8,13 @@ import { Vim } from "src/vimTypes";
 import BetterVimPlugin from "src/main";
 import { markViewPlugin } from "src/markViewPlugin";
 
-let plugin: BetterVimPlugin | null = null;
 let timeoutHandle = 0;
 
 const handler = ({
     detail: { operator, text, plugin },
 }: CustomEvent<YankEventDetail>) => {
     if (operator !== "yank") return;
+    if (!plugin.activeEditorView) return;
 
     const plug = plugin.activeEditorView.plugin(markViewPlugin);
     if (!plug) throw Error("could not load mark view plugin");
@@ -22,14 +22,13 @@ const handler = ({
     plug.setYankText(text, plugin.activeEditorView);
 
     const timeoutEditorView = plugin.activeEditorView;
-    clearTimeout(timeoutHandle);
-    timeoutHandle = window.setTimeout(() => {
+    activeWindow.clearTimeout(timeoutHandle);
+    timeoutHandle = activeWindow.setTimeout(() => {
         plug.cleanYankText(timeoutEditorView);
     }, 500);
 };
 
 function patch(_vim: Vim, _plugin: BetterVimPlugin) {
-    plugin = _plugin;
     addYankEventListener(handler);
 }
 

@@ -20,9 +20,15 @@ export default class BetterVimPlugin extends Plugin {
      * Returns the CodeMirror instance of the active editor view.
      * @returns an object of type `EditorView` or `undefined`.
      */
-    get activeEditorView(): EditorView {
-        return (<{ editor?: { cm: EditorView } }>this.activeView?.leaf.view)
-            .editor?.cm!;
+    get activeEditorView(): EditorView | null {
+        if (this.activeView === null) return null;
+
+        const view = this.activeView.leaf.view as {
+            editor?: { cm: EditorView };
+        };
+        if (!view.editor) return null;
+
+        return view.editor.cm;
     }
     async onload() {
         this.registerEditorExtension([markViewPlugin]);
@@ -69,11 +75,17 @@ export default class BetterVimPlugin extends Plugin {
     }
 
     async loadSettings() {
-        this.settings = Object.assign(
-            {},
-            DEFAULT_SETTINGS,
-            await this.loadData(),
-        );
+        this.settings = { ...DEFAULT_SETTINGS };
+
+        const loadedSettings = await (this.loadData() as Promise<unknown>);
+        if (typeof loadedSettings !== "object") return;
+
+        const loadedSettingsObject = loadedSettings as Record<string, unknown>;
+
+        typeSafeObjectEntries(loadedSettingsObject).forEach(([key, value]) => {
+            if (key in patchesMap && typeof value === "boolean")
+                this.settings[key as keyof typeof patchesMap] = value;
+        });
     }
 
     async saveSettings() {

@@ -1,7 +1,7 @@
 import BetterVimPlugin from "./main";
-import { Vim } from "./vimTypes";
+import { Vim, VimRegisterController } from "./vimTypes";
 
-let originalPushText: any = null;
+let originalPushText: VimRegisterController["pushText"] | null = null;
 
 export const yankEventTarget = new EventTarget();
 export type YankEventDetail = {
@@ -18,7 +18,9 @@ export type YankEventDetail = {
 export function overrideYank(vim: Vim, plugin: BetterVimPlugin) {
     const registerController = vim.getRegisterController();
     if (originalPushText === null)
-        originalPushText = registerController.pushText;
+        originalPushText = registerController.pushText.bind(
+            registerController,
+        ) as typeof registerController.pushText;
 
     registerController.pushText = function (
         registerName,
@@ -27,13 +29,14 @@ export function overrideYank(vim: Vim, plugin: BetterVimPlugin) {
         isVisual,
         lines,
     ) {
-        originalPushText.apply(this, [
-            registerName,
-            operator,
-            text,
-            isVisual,
-            lines,
-        ]);
+        if (originalPushText)
+            originalPushText.apply(this, [
+                registerName,
+                operator,
+                text,
+                isVisual,
+                lines,
+            ]);
 
         const event = new CustomEvent<YankEventDetail>("yank", {
             detail: {

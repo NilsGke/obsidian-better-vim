@@ -60,7 +60,6 @@ function patchListNewLine(vim: Vim) {
                 insertText = `${indent}\n`.repeat(repeat);
             }
         }
-        console.log({ insertText });
 
         view.dispatch({
             changes: {
@@ -72,9 +71,9 @@ function patchListNewLine(vim: Vim) {
                 anchor:
                     direction === "below"
                         ? // end of line plus length of next new line plus 1 (new line character)
-                          line.to + insertText.split("\n")[1]!.length + 1
+                          line.to + insertText.split("\n")[1].length + 1
                         : // beginning of line plus length of new line
-                          line.from + insertText.split("\n")[0]!.length,
+                          line.from + insertText.split("\n")[0].length,
             },
         });
 

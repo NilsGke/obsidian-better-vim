@@ -17,31 +17,31 @@ export interface VimActionArgs {
     repeat: number;
     repeatIsExplicit: boolean;
     expectLiteralNext: boolean;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export interface VimState {
-    inputState: any;
-    insertEnd: { cm: any; id: number; offset: number; assoc: number };
+    inputState: unknown;
+    insertEnd: { cm: unknown; id: number; offset: number; assoc: number };
     insertMode: boolean;
     insertModeRepeat?: number;
     insertModeReturn?: boolean;
-    lastEditActionCommand?: any;
-    lastEditInputState?: any;
+    lastEditActionCommand?: unknown;
+    lastEditInputState?: unknown;
     lastHPos?: number;
     lastHSPos?: number;
-    lastMotion?: any;
+    lastMotion?: unknown;
     lastPastedText?: string | null;
-    lastSelection?: any;
-    marks: Record<number, any>;
+    lastSelection?: unknown;
+    marks: Record<number, unknown>;
     mode: string;
-    sel: any;
+    sel: unknown;
     status: string;
     visualBlock: boolean;
     visualLine: boolean;
     visualMode: boolean;
-    onPasteFn?: (...args: any[]) => void;
-    [key: string]: any;
+    onPasteFn?: (...args: unknown[]) => void;
+    [key: string]: unknown;
 }
 
 /**
@@ -49,8 +49,8 @@ export interface VimState {
  * This is not formally documented, so it's typed structurally.
  */
 export interface VimRegisterController {
-    getRegister(name: string): any;
-    setRegister(name: string, value: any): void;
+    getRegister(name: string): unknown;
+    setRegister(name: string, value: unknown): void;
     pushText(
         registerName: string,
         operator: string,
@@ -58,17 +58,17 @@ export interface VimRegisterController {
         isVisual: boolean,
         lines: string[],
     ): void;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 /**
  * Vim global state returned by getVimGlobalState_().
  */
 export interface VimGlobalState {
-    searchState?: any;
-    macroModeState?: any;
-    lastInsertModeChanges?: any;
-    [key: string]: any;
+    searchState?: unknown;
+    macroModeState?: unknown;
+    lastInsertModeChanges?: unknown;
+    [key: string]: unknown;
 }
 
 /**
@@ -77,26 +77,26 @@ export interface VimGlobalState {
 export type VimMotionFn = (
     cm: VimCodeMirrorAdapter,
     head: number,
-    motionArgs: any,
+    motionArgs: unknown,
     vimState: VimState,
-) => any;
+) => unknown;
 
 /**
  * Operator function signature.
  */
 export type VimOperatorFn = (
     cm: VimCodeMirrorAdapter,
-    operatorArgs: any,
-    ranges: any,
+    operatorArgs: unknown,
+    ranges: unknown,
     vimState: VimState,
-) => any;
+) => unknown;
 
 /**
  * Ex command handler signature.
  */
 export type VimExFn = (
     cm: VimCodeMirrorAdapter,
-    params: any,
+    params: unknown,
     vimState: VimState,
 ) => void;
 
@@ -104,9 +104,9 @@ export type VimExFn = (
  * Option callback signature.
  */
 export type VimOptionCallback = (
-    value: any,
+    value: unknown,
     cm: VimCodeMirrorAdapter,
-    cfg: any,
+    cfg: unknown,
 ) => void;
 
 export interface Vim {
@@ -138,14 +138,14 @@ export interface Vim {
     /** Define a Vim option (:set ...) */
     defineOption(
         name: string,
-        defaultValue: any,
+        defaultValue: unknown,
         type: string,
         aliases?: string[],
         callback?: VimOptionCallback,
     ): void;
 
     /** Define a register (", a-z, +, *, etc) */
-    defineRegister(name: string, register: any): void;
+    defineRegister(name: string, register: unknown): void;
 
     /** Enter insert mode */
     enterInsertMode(cm: VimCodeMirrorAdapter): void;
@@ -160,10 +160,10 @@ export interface Vim {
     exitVisualMode(cm: VimCodeMirrorAdapter, moveHead?: boolean): void;
 
     /** Find mapping result for a key */
-    findKey(cm: VimCodeMirrorAdapter, key: string, origin?: string): any;
+    findKey(cm: VimCodeMirrorAdapter, key: string, origin?: string): unknown;
 
     /** Get option value */
-    getOption(name: string, cm?: VimCodeMirrorAdapter, cfg?: any): any;
+    getOption(name: string, cm?: VimCodeMirrorAdapter, cfg?: unknown): unknown;
 
     /** Returns the internal register controller */
     getRegisterController(): VimRegisterController;
@@ -194,8 +194,8 @@ export interface Vim {
         keys: string,
         type: string,
         name: string,
-        args?: Record<string, any>,
-        extra?: Record<string, any>,
+        args?: Record<string, unknown>,
+        extra?: Record<string, unknown>,
     ): void;
 
     /** Clear mappings (optionally per context) */
@@ -220,9 +220,9 @@ export interface Vim {
     /** Set option value */
     setOption(
         name: string,
-        value: any,
+        value: unknown,
         cm?: VimCodeMirrorAdapter,
-        cfg?: any,
+        cfg?: unknown,
     ): void;
 
     /** Whether error logging is suppressed */
@@ -235,5 +235,5 @@ export interface Vim {
     vimKeyFromEvent(e: KeyboardEvent, vim?: Vim): string;
 
     /** Internal: map command object builder */
-    _mapCommand(command: any): any;
+    _mapCommand(command: unknown): unknown;
 }
