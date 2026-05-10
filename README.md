@@ -1,6 +1,6 @@
 # Obsidian BetterVim
 
-This plugin fixes some annoyances with obsidians built in vim mode.
+This plugin adds some handy features to obsidians built in vim mode.
 
 ## Features:
 
@@ -8,7 +8,7 @@ This plugin fixes some annoyances with obsidians built in vim mode.
 - insert bullet point on new line
 - yank to clipboard
 
-If you miss a feature or have a annoyance, please open a issue.
+If you miss a feature please open a issue.
 
 ## Plans:
 
