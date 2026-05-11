@@ -1,6 +1,6 @@
 {
     "name": "obsidian-better-vim",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "Fixes some annoyances with obsidians vim mode.",
     "main": "main.js",
     "scripts": {

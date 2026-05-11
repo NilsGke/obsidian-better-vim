@@ -78,7 +78,12 @@ export default class BetterVimPlugin extends Plugin {
         this.settings = { ...DEFAULT_SETTINGS };
 
         const loadedSettings = await (this.loadData() as Promise<unknown>);
-        if (typeof loadedSettings !== "object") return;
+        if (
+            loadedSettings === null ||
+            Array.isArray(loadedSettings) ||
+            typeof loadedSettings !== "object"
+        )
+            return;
 
         const loadedSettingsObject = loadedSettings as Record<string, unknown>;
 
