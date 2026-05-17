@@ -1,3 +1,12 @@
+/*
+ * Yank highlight animation.
+ * The element fades from Obsidian's accent color to transparent.
+ *
+ * Two modes controlled by CSS variables set in JavaScript:
+ *   - fade enabled:  animation runs for --ovy-fade-duration, delayed by --ovy-fade-delay
+ *   - fade disabled: animation-duration is 0s, animation-delay equals total duration,
+ *                    so backwards fill keeps the accent bg visible until cleanup
+ */
 @keyframes yankedHighlight {
     0% {
         color: var(--text-on-accent);
@@ -8,26 +17,26 @@
             0.6
         );
     }
-    50% {
-        color: var(--text-on-accent);
-        background-color: hsl(
-            var(--accent-h),
-            var(--accent-s),
-            var(--accent-l),
-            0.6
-        );
-    }
 
     100% {
+        color: inherit;
         background-color: transparent;
     }
 }
 
+/* Single class used for both fade and instant modes — behavior is controlled entirely
+   by --ovy-* CSS custom properties set dynamically by setHighlightCSS() */
 .ovy-highlight {
     --expected-text-height: calc(var(--line-height) * var(--font-text-size));
     --approximate-gap-height: calc(
         (var(--expected-text-height) - var(--font-text-size)) / 4
     );
     padding: var(--approximate-gap-height) 0;
-    animation: yankedHighlight 0.4s ease-out;
+    animation-name: yankedHighlight;
+    animation-duration: var(--ovy-anim-duration, 0.4s);
+    animation-timing-function: ease-out;
+    animation-delay: var(--ovy-anim-delay, 0s);
+    /* backwards fill applies the 0% keyframe (accent bg) during the delay,
+       so the highlight stays solid until the animation starts */
+    animation-fill-mode: backwards;
 }

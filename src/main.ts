@@ -8,8 +8,8 @@ import { EditorView } from "@codemirror/view";
 
 export default class BetterVimPlugin extends Plugin {
     private patched = false;
-    // extend to generic string boolean pair because old settings might exist
-    settings: Settings & { [key: string]: boolean };
+    // extend with index signature because old settings might exist
+    settings: Settings & { [key: string]: unknown };
     vim = window.CodeMirrorAdapter.Vim;
 
     private get activeView() {
@@ -90,6 +90,21 @@ export default class BetterVimPlugin extends Plugin {
         typeSafeObjectEntries(loadedSettingsObject).forEach(([key, value]) => {
             if (key in patchesMap && typeof value === "boolean")
                 this.settings[key as keyof typeof patchesMap] = value;
+            else if (
+                key === "yankHighlightDuration" &&
+                typeof value === "number"
+            )
+                this.settings.yankHighlightDuration = value;
+            else if (
+                key === "yankHighlightFadeEnabled" &&
+                typeof value === "boolean"
+            )
+                this.settings.yankHighlightFadeEnabled = value;
+            else if (
+                key === "yankHighlightFadeDuration" &&
+                typeof value === "number"
+            )
+                this.settings.yankHighlightFadeDuration = value;
         });
     }
 
