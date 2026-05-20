@@ -1,11 +1,11 @@
 import { Patch } from "src/types";
 import { listNewLine } from "./listNewLine";
-import { yankToClipboard } from "./yankToClipboard";
+import { syncSystemClipboard } from "./syncSystemClipboard";
 import { yankHighlight } from "./yankHighlight";
 
 export const patchesMap = {
     "list-new-line": listNewLine,
-    "yank-to-clipboard": yankToClipboard,
+    "sync-system-clipboard": syncSystemClipboard,
     "yank-highlight": yankHighlight,
 } as const satisfies Record<string, Patch>;
 
