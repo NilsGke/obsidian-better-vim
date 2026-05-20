@@ -4,7 +4,7 @@ import {
     removeYankEventListener,
     YankEventDetail,
 } from "src/yankEvent";
-import { Vim, VimRegister, VimRegisterController } from "src/vimTypes";
+import { Vim, VimRegister } from "src/vimTypes";
 import { readClipboardTextSync, writeClipboardText } from "src/clipboard";
 
 const yankHandler = ({ detail: { text } }: CustomEvent<YankEventDetail>) => {
@@ -76,8 +76,7 @@ function patch(vim: Vim) {
     }
 
     if (registersPatched) return;
-    const registerController =
-        vim.getRegisterController() as VimRegisterController;
+    const registerController = vim.getRegisterController();
     if (!registerController.registers) {
         console.error(
             "Vim clipboard sync failed: register controller unavailable.",
@@ -105,8 +104,7 @@ function unpatch(vim: Vim) {
     }
 
     if (!registersPatched) return;
-    const registerController =
-        vim.getRegisterController() as VimRegisterController;
+    const registerController = vim.getRegisterController();
     if (!registerController.registers) {
         console.error(
             "Vim clipboard sync failed: register controller unavailable.",
