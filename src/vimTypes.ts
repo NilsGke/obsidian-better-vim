@@ -45,12 +45,24 @@ export interface VimState {
 }
 
 /**
+ * Register structure used by the Vim register controller.
+ */
+export interface VimRegister {
+    setText: (text: string, linewise?: boolean, blockwise?: boolean) => void;
+    pushText: (text: string, linewise?: boolean) => void;
+    clear: () => void;
+    toString: () => string;
+    linewise?: boolean;
+    blockwise?: boolean;
+}
+
+/**
  * Register controller returned by getRegisterController().
  * This is not formally documented, so it's typed structurally.
  */
 export interface VimRegisterController {
-    getRegister(name: string): unknown;
-    setRegister(name: string, value: unknown): void;
+    getRegister(name: string): VimRegister;
+    setRegister(name: string, value: VimRegister): void;
     pushText(
         registerName: string,
         operator: string,
@@ -58,6 +70,8 @@ export interface VimRegisterController {
         isVisual: boolean,
         lines: string[],
     ): void;
+    registers?: Record<string, VimRegister>;
+    unnamedRegister?: VimRegister;
     [key: string]: unknown;
 }
 
