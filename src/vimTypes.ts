@@ -67,8 +67,8 @@ export interface VimRegisterController {
         registerName: string,
         operator: string,
         text: string,
-        isVisual: boolean,
-        lines: string[],
+        linewise: boolean,
+        blockwise: boolean,
     ): void;
     registers?: Record<string, VimRegister>;
     unnamedRegister?: VimRegister;

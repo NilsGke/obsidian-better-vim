@@ -7,9 +7,13 @@ import {
 import { Vim, VimRegister } from "src/vimTypes";
 import { readClipboardTextSync, writeClipboardText } from "src/clipboard";
 
-const yankHandler = ({ detail: { text } }: CustomEvent<YankEventDetail>) => {
+const yankHandler = ({
+    detail: { text, linewise },
+}: CustomEvent<YankEventDetail>) => {
     if (!text) return;
-    writeClipboardText(text);
+    const normalizedText =
+        linewise && !text.endsWith("\n") ? `${text}\n` : text;
+    writeClipboardText(normalizedText);
 };
 
 class ClipboardRegister implements VimRegister {
