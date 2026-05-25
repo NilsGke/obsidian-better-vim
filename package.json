@@ -1,6 +1,6 @@
 {
     "name": "obsidian-better-vim",
-    "version": "1.0.4",
+    "version": "1.0.6",
     "description": "Fixes some annoyances with obsidians vim mode.",
     "main": "main.js",
     "scripts": {
@@ -26,5 +26,6 @@
         "typescript": "5.9.3",
         "typescript-eslint": "^8.59.2",
         "globals": "^17.6.0"
-    }
+    },
+    "packageManager": "pnpm@11.1.3"
 }
