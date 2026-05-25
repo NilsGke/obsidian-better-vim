@@ -17,25 +17,43 @@ jobs:
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Ensure tag is on main
+              id: main_check
+              run: |
+                  git fetch --no-tags origin main
+                  if git merge-base --is-ancestor "$GITHUB_SHA" "origin/main"; then
+                      echo "on_main=true" >> "$GITHUB_OUTPUT"
+                  else
+                      echo "on_main=false" >> "$GITHUB_OUTPUT"
+                  fi
 
             - name: Setup Node.js
+              if: steps.main_check.outputs.on_main == 'true'
               uses: actions/setup-node@v4
               with:
                   node-version: 22
 
             - name: Enable Corepack (pnpm)
+              if: steps.main_check.outputs.on_main == 'true'
               run: corepack enable
 
             - name: Prepare pnpm
+              if: steps.main_check.outputs.on_main == 'true'
               run: corepack prepare pnpm@11.1.3 --activate
 
             - name: Install dependencies
+              if: steps.main_check.outputs.on_main == 'true'
               run: pnpm install --frozen-lockfile
 
             - name: Build plugin (esbuild)
+              if: steps.main_check.outputs.on_main == 'true'
               run: pnpm run build
 
             - name: Attest build provenance
+              if: steps.main_check.outputs.on_main == 'true'
               uses: actions/attest-build-provenance@v2
               with:
                   subject-path: |
@@ -44,6 +62,7 @@ jobs:
                       styles.css
 
             - name: Extract tag
+              if: steps.main_check.outputs.on_main == 'true'
               id: tag
               run: |
                   TAG="${GITHUB_REF#refs/tags/}"
@@ -51,6 +70,7 @@ jobs:
                   echo "tag=$TAG" >> $GITHUB_OUTPUT
 
             - name: Create release
+              if: steps.main_check.outputs.on_main == 'true'
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
