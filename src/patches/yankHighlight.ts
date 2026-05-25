@@ -10,19 +10,6 @@ import { markViewPlugin } from "src/markViewPlugin";
 
 let timeoutHandle = 0;
 
-/*
- * Injects/updates a <style> element that sets CSS custom properties on :root.
- * These control the .ovy-highlight animation:
- *
- *   fade enabled:  --ovy-anim-duration = fadeDuration
- *                   --ovy-anim-delay   = max(0, totalDuration - fadeDuration)
- *                   → solid for delay ms, then fade for duration ms
- *
- *   fade disabled: --ovy-anim-duration = 0s
- *                   --ovy-anim-delay   = totalDuration
- *                   → backwards fill keeps accent bg solid for totalDuration,
- *                     then 0s animation snaps to transparent (cleanup removes it)
- */
 export function setHighlightCSS(plugin: BetterVimPlugin) {
     const doc = activeWindow.document;
     const { yankHighlightDuration, yankHighlightFadeEnabled, yankHighlightFadeDuration } =

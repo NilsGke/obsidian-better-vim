@@ -8,7 +8,6 @@ import { EditorView } from "@codemirror/view";
 
 export default class BetterVimPlugin extends Plugin {
     private patched = false;
-    // extend with index signature because old settings might exist
     settings: Settings & { [key: string]: unknown };
     vim = window.CodeMirrorAdapter.Vim;
 
