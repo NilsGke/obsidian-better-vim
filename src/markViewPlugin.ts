@@ -107,8 +107,6 @@ export class MarkViewPlugin implements PluginValue {
         const from = viewport.from + yankPosition;
         const to = from + visibleYankText.length;
 
-        /* single class for both fade and instant modes — behavior controlled
-           by --ovy-anim-duration / --ovy-anim-delay CSS custom properties */
         builder.add(from, to, Decoration.mark({ class: "ovy-highlight" }));
 
         return builder.finish();
