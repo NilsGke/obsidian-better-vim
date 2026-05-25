@@ -14,6 +14,10 @@ If you miss a feature please open a issue.
 
 - I intend to integrate something like [nvim-mini/mini.surround](https://github.com/nvim-mini/mini.surround)
 
+## Releases (Changesets)
+
+This repo uses Changesets. Add a changeset in your PR with `pnpm changeset`. When the PR merges to `main`, the release workflow versions the plugin, updates `manifest.json`/`versions.json`, tags `x.x.x`, and creates the GitHub release automatically.
+
 ## Installation
 
 ### Community Plugins
