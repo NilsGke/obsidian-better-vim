@@ -8,8 +8,8 @@ export type YankEventDetail = {
     registerName: string;
     operator: string;
     text: string;
-    isVisual: boolean;
-    lines: string[];
+    linewise: boolean;
+    blockwise: boolean;
     vim: Vim;
     plugin: BetterVimPlugin;
 };
@@ -26,16 +26,16 @@ export function overrideYank(vim: Vim, plugin: BetterVimPlugin) {
         registerName,
         operator,
         text,
-        isVisual,
-        lines,
+        linewise,
+        blockwise,
     ) {
         if (originalPushText)
             originalPushText.apply(this, [
                 registerName,
                 operator,
                 text,
-                isVisual,
-                lines,
+                linewise,
+                blockwise,
             ]);
 
         const event = new CustomEvent<YankEventDetail>("yank", {
@@ -43,8 +43,8 @@ export function overrideYank(vim: Vim, plugin: BetterVimPlugin) {
                 registerName,
                 operator,
                 text,
-                isVisual,
-                lines,
+                linewise,
+                blockwise,
                 vim,
                 plugin,
             },
