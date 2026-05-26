@@ -10,6 +10,7 @@ permissions:
 
 jobs:
     version-and-release:
+        if: github.repository == 'NilsGke/obsidian-better-vim' && github.event.repository.fork == false
         runs-on: ubuntu-latest
 
         steps:
