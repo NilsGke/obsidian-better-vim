@@ -1,5 +1,5 @@
 import { MarkdownView, Plugin } from "obsidian";
-import { patches, patchesMap } from "./patches";
+import { patches, newPatchesMap as patchesMap } from "./patches";
 import { DEFAULT_SETTINGS, Settings, SettingsTab } from "./settings";
 import { typeSafeObjectEntries } from "./util";
 import { overrideYank } from "./yankEvent";
@@ -8,8 +8,7 @@ import { EditorView } from "@codemirror/view";
 
 export default class BetterVimPlugin extends Plugin {
     private patched = false;
-    // extend to generic string boolean pair because old settings might exist
-    settings: Settings & { [key: string]: boolean };
+    settings: Settings;
     vim = window.CodeMirrorAdapter.Vim;
 
     private get activeView() {
@@ -55,11 +54,15 @@ export default class BetterVimPlugin extends Plugin {
             );
             return;
         }
-
         typeSafeObjectEntries(this.settings).forEach(([key, enabled]) => {
             if (!(key in patchesMap)) return;
             const patchName = key as keyof typeof patchesMap;
-            if (enabled) patchesMap[patchName].patch(vim, this);
+            if (enabled)
+                patchesMap[patchName].patch({
+                    vim,
+                    plugin: this,
+                    getSetting: (settingKey) => this.settings[key][settingKey],
+                });
         });
 
         overrideYank(this.vim, this);
@@ -71,26 +74,33 @@ export default class BetterVimPlugin extends Plugin {
         const vim = window.CodeMirrorAdapter?.Vim;
         if (!vim) return;
 
-        patches.forEach(({ unpatch }) => unpatch(vim, this));
+        patches.forEach((patch) => patch.unpatch({ vim, plugin: this }));
     }
 
     async loadSettings() {
-        this.settings = { ...DEFAULT_SETTINGS };
+        const base = structuredClone(DEFAULT_SETTINGS) as Settings;
 
-        const loadedSettings = await (this.loadData() as Promise<unknown>);
-        if (
-            loadedSettings === null ||
-            Array.isArray(loadedSettings) ||
-            typeof loadedSettings !== "object"
-        )
+        const loaded = await this.loadData();
+
+        if (!loaded || typeof loaded !== "object" || Array.isArray(loaded)) {
+            this.settings = base;
             return;
+        }
 
-        const loadedSettingsObject = loadedSettings as Record<string, unknown>;
+        const data = loaded as Record<string, unknown>;
 
-        typeSafeObjectEntries(loadedSettingsObject).forEach(([key, value]) => {
-            if (key in patchesMap && typeof value === "boolean")
-                this.settings[key as keyof typeof patchesMap] = value;
-        });
+        for (const [key, value] of typeSafeObjectEntries(data)) {
+            if (!(key in patchesMap)) continue;
+            if (!value || typeof value !== "object" || Array.isArray(value))
+                continue;
+
+            const k = key as keyof typeof patchesMap;
+
+            Object.assign(base[k], value);
+        }
+
+        this.settings = base;
+        await this.saveSettings();
     }
 
     async saveSettings() {

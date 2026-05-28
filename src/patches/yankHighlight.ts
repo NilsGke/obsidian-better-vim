@@ -3,10 +3,10 @@ import {
     removeYankEventListener,
     YankEventDetail,
 } from "src/yankEvent";
-import { Patch } from "src/types";
 import { Vim } from "src/vimTypes";
 import BetterVimPlugin from "src/main";
 import { markViewPlugin } from "src/markViewPlugin";
+import { createPatch } from "./patch";
 
 let timeoutHandle = 0;
 
@@ -28,7 +28,7 @@ const handler = ({
     }, 500);
 };
 
-function patch(_vim: Vim, _plugin: BetterVimPlugin) {
+function patchFn(_vim: Vim, _plugin: BetterVimPlugin) {
     addYankEventListener(handler);
 }
 
@@ -39,6 +39,17 @@ function unpatch(_vim: Vim, _plugin: BetterVimPlugin) {
 export const yankHighlight = {
     description: "highlight yanks",
     defaultEnabled: true,
-    patch,
+    patch: patchFn,
     unpatch,
-} as const satisfies Patch;
+};
+
+export default createPatch({
+    defaultSettings: {
+        __patch: {
+            name: "Highlith yanks",
+            defaultValue: true as boolean,
+        },
+    },
+    patch: () => addYankEventListener(handler),
+    unpatch: () => removeYankEventListener(handler),
+});

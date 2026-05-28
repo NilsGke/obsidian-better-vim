@@ -1,7 +1,8 @@
 import { Patch } from "src/types";
 import { Vim, VimActionArgs, VimCodeMirrorAdapter } from "src/vimTypes";
+import { createPatch } from "./patch";
 
-function patchListNewLine(vim: Vim) {
+function patchListNewLine({ vim }: { vim: Vim }) {
     const insertLine = (
         codeMirrorAdapter: VimCodeMirrorAdapter,
         actionArgs: VimActionArgs,
@@ -106,7 +107,7 @@ function patchListNewLine(vim: Vim) {
     );
 }
 
-function unpatchListNewLine(vim: Vim) {
+function unpatchListNewLine({ vim }: { vim: Vim }) {
     vim.unmap("o", "normal");
     vim.unmap("O", "normal");
 }
@@ -115,6 +116,19 @@ export const listNewLine = {
     description:
         "inserts a new bullet point of doing vims `o` or `O` on a bullet list or numbered list",
     defaultEnabled: true,
+    patch: (vim) => patchListNewLine({ vim }),
+    unpatch: (vim) => unpatchListNewLine({ vim }),
+} as const satisfies Patch;
+
+export default createPatch({
+    defaultSettings: {
+        __patch: {
+            name: "List new bullet point",
+            description:
+                "inserts a new bullet point of doing vims `o` or `O` on a bullet list or numbered list",
+            defaultValue: true as boolean,
+        },
+    },
     patch: patchListNewLine,
     unpatch: unpatchListNewLine,
-} as const satisfies Patch;
+});
