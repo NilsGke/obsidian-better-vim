@@ -114,6 +114,7 @@ function unpatchListNewLine(vim: Vim) {
 export const listNewLine = {
     description:
         "inserts a new bullet point of doing vims `o` or `O` on a bullet list or numbered list",
+    defaultEnabled: true,
     patch: patchListNewLine,
     unpatch: unpatchListNewLine,
 } as const satisfies Patch;

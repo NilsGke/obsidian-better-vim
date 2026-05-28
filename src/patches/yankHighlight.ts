@@ -38,6 +38,7 @@ function unpatch(_vim: Vim, _plugin: BetterVimPlugin) {
 
 export const yankHighlight = {
     description: "highlight yanks",
+    defaultEnabled: true,
     patch,
     unpatch,
 } as const satisfies Patch;

@@ -135,6 +135,7 @@ function unpatch(vim: Vim) {
 
 export const syncSystemClipboard = {
     description: "syncs yank/paste with the system clipboard",
+    defaultEnabled: true,
     patch,
     unpatch,
 } as const satisfies Patch;

@@ -7,7 +7,10 @@ import { Vim } from "./vimTypes";
 export type Settings = Record<keyof typeof patchesMap, boolean>;
 
 export const DEFAULT_SETTINGS = Object.fromEntries(
-    typeSafeObjectEntries(patchesMap).map(([name]) => [name, true] as const),
+    typeSafeObjectEntries(patchesMap).map(([name, patch]) => [
+        name,
+        patch.defaultEnabled,
+    ]),
 ) as Settings;
 
 export class SettingsTab extends PluginSettingTab {

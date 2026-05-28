@@ -7,6 +7,7 @@ This plugin adds some handy features to obsidians built in vim mode.
 - Vim yank highlight (inspired by [aleksey-rowan/obsidian-vim-yank-highlight](https://github.com/aleksey-rowan/obsidian-vim-yank-highlight))
 - insert bullet point on new line
 - sync system clipboard (yank & paste)
+- visual-line motions for j/k/0/$/_/A/I/V (optional)
 
 If you miss a feature please open a issue.
 
