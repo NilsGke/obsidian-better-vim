@@ -1,5 +1,5 @@
-import BetterVimPlugin from "./main";
-import { Vim, VimRegisterController } from "./vimTypes";
+import BetterVimPlugin from "../main";
+import { Vim, VimRegisterController } from "../vimTypes";
 
 let originalPushText: VimRegisterController["pushText"] | null = null;
 

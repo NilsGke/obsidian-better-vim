@@ -11,7 +11,7 @@ import {
     ViewPlugin,
 } from "@codemirror/view";
 
-import { longestCommonSubstring } from "./util";
+import { longestCommonSubstring } from "./util/longestCommonSubstring";
 
 /** The `MarkViewPlugin` class is a TypeScript class that represents a plugin for marking and highlighting text in an editor view.
  * @author https://github.com/aleksey-rowan
@@ -107,7 +107,11 @@ export class MarkViewPlugin implements PluginValue {
         const from = viewport.from + yankPosition;
         const to = from + visibleYankText.length;
 
-        builder.add(from, to, Decoration.mark({ class: "ovy-highlight" }));
+        builder.add(
+            from,
+            to,
+            Decoration.mark({ class: "better-vim-highlight" }),
+        );
 
         return builder.finish();
     }

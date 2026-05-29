@@ -20,6 +20,18 @@ export interface VimActionArgs {
     [key: string]: unknown;
 }
 
+export interface VimPos {
+    line: number;
+    ch: number;
+    sticky?: string;
+}
+
+export interface VimMotionArgs {
+    repeat: number;
+    repeatIsExplicit?: boolean;
+    [key: string]: unknown;
+}
+
 export interface VimState {
     inputState: unknown;
     insertEnd: { cm: unknown; id: number; offset: number; assoc: number };
@@ -90,8 +102,8 @@ export interface VimGlobalState {
  */
 export type VimMotionFn = (
     cm: VimCodeMirrorAdapter,
-    head: number,
-    motionArgs: unknown,
+    head: VimPos,
+    motionArgs: VimMotionArgs,
     vimState: VimState,
 ) => unknown;
 

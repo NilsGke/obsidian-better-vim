@@ -1,9 +1,3 @@
-export const typeSafeObjectEntries = <T extends Record<PropertyKey, unknown>>(
-    obj: T,
-): { [K in keyof T]: [K, T[K]] }[keyof T][] => {
-    return Object.entries(obj) as { [K in keyof T]: [K, T[K]] }[keyof T][];
-};
-
 /**
  * The function `longestCommonSubstring` takes two strings as input and returns the longest common
  * substring between them.
@@ -13,6 +7,7 @@ export const typeSafeObjectEntries = <T extends Record<PropertyKey, unknown>>(
  * finding the longest common substring.
  * @returns the longest common substring between `str1` and `str2`.
  */
+
 export function longestCommonSubstring(str1: string, str2: string): string {
     const n = str1.length;
     const m = str2.length;
