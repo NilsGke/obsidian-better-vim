@@ -1,44 +1,10 @@
-import { Patch } from "src/types";
-import { Vim } from "src/vimTypes";
 import { createPatch } from "./patch";
+import { moveToFirstNonWhitespaceOfVisualLine } from "../util/firstNonWhitespaceOfVisualLine";
 
 const CONTEXTS = ["normal", "visual", "operator"] as const;
 const NORMAL_CONTEXT = "normal" as const;
-
-function patchVisualLineMotions({ vim }: { vim: Vim }) {
-    CONTEXTS.forEach((context) => {
-        vim.noremap("j", "gj", context);
-        vim.noremap("k", "gk", context);
-        vim.noremap("0", "g0", context);
-        vim.noremap("$", "g$", context);
-        vim.noremap("_", "g_", context);
-    });
-
-    vim.noremap("A", "g$a", NORMAL_CONTEXT);
-    vim.noremap("I", "g0i", NORMAL_CONTEXT);
-    vim.noremap("V", "g0vg$", NORMAL_CONTEXT);
-}
-
-function unpatchVisualLineMotions({ vim }: { vim: Vim }) {
-    CONTEXTS.forEach((context) => {
-        vim.unmap("j", context);
-        vim.unmap("k", context);
-        vim.unmap("0", context);
-        vim.unmap("$", context);
-        vim.unmap("_", context);
-    });
-
-    vim.unmap("A", NORMAL_CONTEXT);
-    vim.unmap("I", NORMAL_CONTEXT);
-    vim.unmap("V", NORMAL_CONTEXT);
-}
-
-export const visualLineMotions = {
-    description: "use visual-line motions (j/k/0/$/_/A/I/V) on wrapped lines",
-    defaultEnabled: false,
-    patch: (vim) => patchVisualLineMotions({ vim }),
-    unpatch: (vim) => unpatchVisualLineMotions({ vim }),
-} as const satisfies Patch;
+const VISUAL_LINE_FIRST_NON_WHITESPACE_MOTION =
+    "obsidianVisualLineFirstNonWhitespace";
 
 export default createPatch({
     defaultSettings: {
@@ -79,6 +45,10 @@ export default createPatch({
     },
 
     patch: ({ vim, getSetting: getSubSetting }) => {
+        vim.defineMotion(
+            VISUAL_LINE_FIRST_NON_WHITESPACE_MOTION,
+            moveToFirstNonWhitespaceOfVisualLine,
+        );
         CONTEXTS.forEach((context) => {
             if (getSubSetting("jk")) {
                 vim.noremap("j", "gj", context);
@@ -89,7 +59,13 @@ export default createPatch({
                 vim.noremap("$", "g$", context);
             }
             if (getSubSetting("_")) {
-                vim.noremap("_", "g_", context);
+                vim.mapCommand(
+                    "_",
+                    "motion",
+                    VISUAL_LINE_FIRST_NON_WHITESPACE_MOTION,
+                    {},
+                    { context },
+                );
             }
         });
 
@@ -99,5 +75,17 @@ export default createPatch({
         }
         if (getSubSetting("V")) vim.noremap("V", "g0vg$", NORMAL_CONTEXT);
     },
-    unpatch: unpatchVisualLineMotions,
+    unpatch: ({ vim }) => {
+        CONTEXTS.forEach((context) => {
+            vim.unmap("j", context);
+            vim.unmap("k", context);
+            vim.unmap("0", context);
+            vim.unmap("$", context);
+            vim.unmap("_", context);
+        });
+
+        vim.unmap("A", NORMAL_CONTEXT);
+        vim.unmap("I", NORMAL_CONTEXT);
+        vim.unmap("V", NORMAL_CONTEXT);
+    },
 });

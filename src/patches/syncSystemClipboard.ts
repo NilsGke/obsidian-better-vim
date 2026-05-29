@@ -1,6 +1,6 @@
-import { removeYankEventListener, YankEventDetail } from "src/yankEvent";
+import { removeYankEventListener, YankEventDetail } from "src/util/yankEvent";
 import { VimRegister } from "src/vimTypes";
-import { readClipboardTextSync, writeClipboardText } from "src/clipboard";
+import { readClipboardTextSync, writeClipboardText } from "src/util/clipboard";
 import { createPatch } from "./patch";
 
 const yankHandler = ({

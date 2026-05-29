@@ -2,8 +2,8 @@ import { MarkdownView, Plugin } from "obsidian";
 import { patches, patchesMap } from "./patches";
 import { createGetSetting } from "./patches/patch";
 import { DEFAULT_SETTINGS, Settings, SettingsTab } from "./settings";
-import { typeSafeObjectEntries } from "./util";
-import { overrideYank } from "./yankEvent";
+import { typeSafeObjectEntries } from "./util/typeSafeObjectEntries";
+import { overrideYank } from "./util/yankEvent";
 import { markViewPlugin } from "./markViewPlugin";
 import { EditorView } from "@codemirror/view";
 
@@ -56,9 +56,10 @@ export default class BetterVimPlugin extends Plugin {
             return;
         }
         typeSafeObjectEntries(patchesMap).forEach(
-            <K extends keyof typeof patchesMap>(
-                [key, patch]: [K, (typeof patchesMap)[K]],
-            ) => {
+            <K extends keyof typeof patchesMap>([key, patch]: [
+                K,
+                (typeof patchesMap)[K],
+            ]) => {
                 if (!this.settings[key].__patch) return;
 
                 const getSetting = createGetSetting(

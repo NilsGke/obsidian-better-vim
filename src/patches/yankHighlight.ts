@@ -2,10 +2,10 @@ import {
     addYankEventListener,
     removeYankEventListener,
     YankEventDetail,
-} from "src/yankEvent";
+} from "src/util/yankEvent";
 import { Vim } from "src/vimTypes";
 import BetterVimPlugin from "src/main";
-import { markViewPlugin } from "src/markViewPlugin";
+import { markViewPlugin } from "../markViewPlugin";
 import { createPatch } from "./patch";
 
 let timeoutHandle = 0;

@@ -2,7 +2,7 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 import { patchesMap } from "./patches";
 import { createGetSetting, SettingValueFor } from "./patches/patch";
 import ExamplePlugin from "./main";
-import { typeSafeObjectEntries } from "./util";
+import { typeSafeObjectEntries } from "./util/typeSafeObjectEntries";
 import { Vim } from "./vimTypes";
 
 type PatchMap = typeof patchesMap;

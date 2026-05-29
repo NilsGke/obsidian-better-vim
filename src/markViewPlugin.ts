@@ -11,7 +11,7 @@ import {
     ViewPlugin,
 } from "@codemirror/view";
 
-import { longestCommonSubstring } from "./util";
+import { longestCommonSubstring } from "./util/longestCommonSubstring";
 
 /** The `MarkViewPlugin` class is a TypeScript class that represents a plugin for marking and highlighting text in an editor view.
  * @author https://github.com/aleksey-rowan
