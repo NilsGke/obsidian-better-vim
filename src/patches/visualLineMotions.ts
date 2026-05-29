@@ -46,7 +46,7 @@ export default createPatch({
             name: "Visual line navigation",
             description:
                 "use visual-line motions (j/k/0/$/_/A/I/V) on wrapped lines",
-            defaultValue: true as boolean,
+            defaultValue: true,
         },
 
         jk: {

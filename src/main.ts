@@ -1,5 +1,6 @@
 import { MarkdownView, Plugin } from "obsidian";
-import { patches, newPatchesMap as patchesMap } from "./patches";
+import { patches, patchesMap } from "./patches";
+import { createGetSetting } from "./patches/patch";
 import { DEFAULT_SETTINGS, Settings, SettingsTab } from "./settings";
 import { typeSafeObjectEntries } from "./util";
 import { overrideYank } from "./yankEvent";
@@ -54,16 +55,24 @@ export default class BetterVimPlugin extends Plugin {
             );
             return;
         }
-        typeSafeObjectEntries(this.settings).forEach(([key, enabled]) => {
-            if (!(key in patchesMap)) return;
-            const patchName = key as keyof typeof patchesMap;
-            if (enabled)
-                patchesMap[patchName].patch({
+        typeSafeObjectEntries(patchesMap).forEach(
+            <K extends keyof typeof patchesMap>(
+                [key, patch]: [K, (typeof patchesMap)[K]],
+            ) => {
+                if (!this.settings[key].__patch) return;
+
+                const getSetting = createGetSetting(
+                    patch.defaultSettings,
+                    this.settings[key],
+                );
+
+                patch.patch({
                     vim,
                     plugin: this,
-                    getSetting: (settingKey) => this.settings[key][settingKey],
+                    getSetting,
                 });
-        });
+            },
+        );
 
         overrideYank(this.vim, this);
 
@@ -80,7 +89,7 @@ export default class BetterVimPlugin extends Plugin {
     async loadSettings() {
         const base = structuredClone(DEFAULT_SETTINGS) as Settings;
 
-        const loaded = await this.loadData();
+        const loaded = (await this.loadData()) as unknown;
 
         if (!loaded || typeof loaded !== "object" || Array.isArray(loaded)) {
             this.settings = base;

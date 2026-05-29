@@ -126,7 +126,7 @@ export default createPatch({
             name: "List new bullet point",
             description:
                 "inserts a new bullet point of doing vims `o` or `O` on a bullet list or numbered list",
-            defaultValue: true as boolean,
+            defaultValue: true,
         },
     },
     patch: patchListNewLine,

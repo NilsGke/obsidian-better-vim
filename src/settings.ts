@@ -1,21 +1,18 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
-import { newPatchesMap as patchesMap } from "./patches";
+import { patchesMap } from "./patches";
+import { createGetSetting, SettingValueFor } from "./patches/patch";
 import ExamplePlugin from "./main";
 import { typeSafeObjectEntries } from "./util";
 import { Vim } from "./vimTypes";
 
 type PatchMap = typeof patchesMap;
 
+// Pull a patch's default settings map from the registry.
 type SettingsOf<K extends keyof PatchMap> = PatchMap[K]["defaultSettings"];
-
-type SettingValue<
-    K extends keyof PatchMap,
-    S extends keyof SettingsOf<K>,
-> = SettingsOf<K>[S] extends { defaultValue: infer V } ? V : never; // we need this hack with `extends ...` because typescript cannot remember the union value two levels down
 
 export type Settings = {
     -readonly [K in keyof PatchMap]: {
-        [S in keyof SettingsOf<K>]: SettingValue<K, S>;
+        [S in keyof SettingsOf<K>]: SettingValueFor<SettingsOf<K>, S>;
     };
 };
 
@@ -27,20 +24,18 @@ const _defaultSettings = {} as Settings;
 export const DEFAULT_SETTINGS: DeepReadonly<typeof _defaultSettings> =
     _defaultSettings;
 
-for (const _key in patchesMap) {
-    const key = _key as keyof typeof patchesMap;
-    const patch = patchesMap[key];
+typeSafeObjectEntries(patchesMap).forEach(
+    <K extends keyof PatchMap>([key, patch]: [K, PatchMap[K]]) => {
+        const settings = {} as Settings[K];
 
-    const settings: any = {};
+        typeSafeObjectEntries(patch.defaultSettings).forEach(
+            ([settingKey, setting]) =>
+                (settings[settingKey] = setting.defaultValue),
+        );
 
-    for (const _settingKey in patch.defaultSettings) {
-        // is not just "__patch" but every setting key. TS cannot infer this
-        const settingKey = _settingKey as keyof typeof patch.defaultSettings;
-        settings[settingKey] = patch.defaultSettings[settingKey].defaultValue;
-    }
-
-    _defaultSettings[key] = settings;
-}
+        _defaultSettings[key] = settings;
+    },
+);
 
 export class SettingsTab extends PluginSettingTab {
     plugin: ExamplePlugin;
@@ -57,10 +52,10 @@ export class SettingsTab extends PluginSettingTab {
 
         containerEl.empty();
 
-        typeSafeObjectEntries(this.plugin.settings)
-            .filter(([key]) => key in patchesMap)
-            .forEach(([key, settingValues]) => {
-                const settings = patchesMap[key].defaultSettings;
+        typeSafeObjectEntries(patchesMap).forEach(
+            <K extends keyof PatchMap>([key, patch]: [K, PatchMap[K]]) => {
+                const settingValues = this.plugin.settings[key];
+                const settings = patch.defaultSettings;
                 const { sub } = createSetting({
                     expandable: Object.keys(settings).length > 1,
                     value: settingValues.__patch,
@@ -70,43 +65,46 @@ export class SettingsTab extends PluginSettingTab {
                         "description" in settings.__patch
                             ? settings.__patch.description
                             : null,
-                    onToggle: async (value) => {
+                    onToggle: (value) => {
                         if (value)
-                            patchesMap[key].patch({
+                            patch.patch({
                                 vim: this.#vim,
                                 plugin: this.plugin,
-                                getSetting: (settingKey) =>
-                                    this.plugin.settings[key][settingKey],
+                                getSetting: createGetSetting(
+                                    patch.defaultSettings,
+                                    this.plugin.settings[key],
+                                ),
                             });
                         else
-                            patchesMap[key].unpatch({
+                            patch.unpatch({
                                 vim: this.#vim,
                                 plugin: this.plugin,
                             });
 
                         this.plugin.settings[key].__patch = value;
-                        await this.plugin.saveSettings();
+                        void this.plugin.saveSettings();
                     },
                 });
 
                 const repatch = () => {
-                    patchesMap[key].unpatch({
+                    patch.unpatch({
                         vim: this.#vim,
                         plugin: this.plugin,
                     });
-                    patchesMap[key].patch({
+                    patch.patch({
                         vim: this.#vim,
                         plugin: this.plugin,
-                        getSetting: (settingKey) =>
-                            this.plugin.settings[key][settingKey],
+                        getSetting: createGetSetting(
+                            patch.defaultSettings,
+                            this.plugin.settings[key],
+                        ),
                     });
                 };
 
-                typeSafeObjectEntries(patchesMap[key].defaultSettings).forEach(
+                typeSafeObjectEntries(patch.defaultSettings).forEach(
                     ([_settingKey, { defaultValue, name }]) => {
                         if (_settingKey === "__patch" || !sub) return;
-                        const settingKey =
-                            _settingKey as keyof (typeof patchesMap)[typeof key]["defaultSettings"];
+                        const settingKey = _settingKey as keyof typeof settings;
                         const option = settings[settingKey];
                         const setting = new Setting(sub).setName(name);
 
@@ -120,9 +118,11 @@ export class SettingsTab extends PluginSettingTab {
                                 setting.addToggle((toggle) =>
                                     toggle
                                         .setValue(
-                                            this.plugin.settings[key][
-                                                settingKey
-                                            ],
+                                            Boolean(
+                                                this.plugin.settings[key][
+                                                    settingKey
+                                                ],
+                                            ),
                                         )
                                         .onChange(async (v) => {
                                             this.plugin.settings[key][
@@ -156,9 +156,11 @@ export class SettingsTab extends PluginSettingTab {
                                 setting.addText((text) =>
                                     text
                                         .setValue(
-                                            this.plugin.settings[key][
-                                                settingKey
-                                            ].toString() as unknown as string,
+                                            String(
+                                                this.plugin.settings[key][
+                                                    settingKey
+                                                ],
+                                            ),
                                         )
                                         .onChange(async (v) => {
                                             const num = parseInt(v);
@@ -177,7 +179,8 @@ export class SettingsTab extends PluginSettingTab {
                         }
                     },
                 );
-            });
+            },
+        );
     }
 }
 

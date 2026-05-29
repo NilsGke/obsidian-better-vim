@@ -1,5 +1,5 @@
 import { removeYankEventListener, YankEventDetail } from "src/yankEvent";
-import { Vim, VimRegister } from "src/vimTypes";
+import { VimRegister } from "src/vimTypes";
 import { readClipboardTextSync, writeClipboardText } from "src/clipboard";
 import { createPatch } from "./patch";
 
@@ -69,46 +69,12 @@ let originalUnnamedRegister: VimRegister | undefined;
 let registersPatched = false;
 let yankListenerAttached = false;
 
-function patch({ vim }: { vim: Vim }) {}
-
-function unpatch({ vim }: { vim: Vim }) {
-    if (yankListenerAttached) {
-        removeYankEventListener(yankHandler);
-        yankListenerAttached = false;
-    }
-
-    if (!registersPatched) return;
-    const registerController = vim.getRegisterController();
-    if (!registerController.registers) {
-        console.error(
-            "Vim clipboard sync failed: register controller unavailable.",
-        );
-        registersPatched = false;
-        return;
-    }
-
-    if (originalPlusRegister) {
-        registerController.registers["+"] = originalPlusRegister;
-    }
-    if (originalQuoteRegister) {
-        registerController.registers['"'] = originalQuoteRegister;
-    }
-    if ("unnamedRegister" in registerController && originalUnnamedRegister) {
-        registerController.unnamedRegister = originalUnnamedRegister;
-    }
-
-    originalPlusRegister = undefined;
-    originalQuoteRegister = undefined;
-    originalUnnamedRegister = undefined;
-    registersPatched = false;
-}
-
 export default createPatch({
     defaultSettings: {
         __patch: {
             name: "Sync system clipboard",
             description: "syncs yank/paste with the system clipboard",
-            defaultValue: true as boolean,
+            defaultValue: true,
         },
         "yank-to-clipboard": {
             name: "Yank to clipboard",

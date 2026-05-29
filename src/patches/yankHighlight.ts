@@ -47,7 +47,7 @@ export default createPatch({
     defaultSettings: {
         __patch: {
             name: "Highlith yanks",
-            defaultValue: true as boolean,
+            defaultValue: true,
         },
     },
     patch: () => addYankEventListener(handler),
