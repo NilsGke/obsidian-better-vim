@@ -111,7 +111,9 @@ export class SettingsTab extends PluginSettingTab {
                         if ("description" in option)
                             setting.setDesc(option.description);
 
-                        setting.settingEl.style.backgroundColor = "#8881";
+                        setting.settingEl.classList.add(
+                            "better-vim-setting-subitem",
+                        );
 
                         switch (typeof defaultValue) {
                             case "boolean":
@@ -204,16 +206,17 @@ function createSetting({
 
     setting.addToggle((toggle) =>
         toggle.setValue(value).onChange((v) => {
-            if (expandable) sub.style.display = v ? "block" : "none";
+            if (expandable)
+                sub.classList.toggle("better-vim-setting-sub-hidden", !v);
             onToggle(v);
         }),
     );
     if (!expandable) return { setting };
 
     const sub = setting.settingEl.createDiv();
-    if (!value) sub.style.display = "none";
-    sub.style.flex = "1 1 100%";
-    setting.settingEl.style.flexWrap = "wrap";
+    sub.classList.add("better-vim-setting-sub");
+    setting.settingEl.classList.add("better-vim-setting-expandable");
+    if (!value) sub.classList.add("better-vim-setting-sub-hidden");
 
     return { setting, sub };
 }

@@ -107,7 +107,11 @@ export class MarkViewPlugin implements PluginValue {
         const from = viewport.from + yankPosition;
         const to = from + visibleYankText.length;
 
-        builder.add(from, to, Decoration.mark({ class: "ovy-highlight" }));
+        builder.add(
+            from,
+            to,
+            Decoration.mark({ class: "better-vim-highlight" }),
+        );
 
         return builder.finish();
     }
