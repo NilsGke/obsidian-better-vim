@@ -7,7 +7,7 @@
         "dev": "node esbuild.config.mjs",
         "build": "rm -rf dist/ && tsc -noEmit -skipLibCheck && node esbuild.config.mjs production && mkdir -p dist && cp main.js dist/ && cp manifest.json dist/ && cp styles.css dist/",
         "lint": "eslint",
-        "version": "node scripts/version.mjs"
+        "bump-version": "node scripts/version.mjs"
     },
     "keywords": [],
     "author": "Nils Goeke",

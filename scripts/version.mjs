@@ -52,13 +52,13 @@ async function main() {
 
     // 1. update package.json
     pkg.version = targetVersion;
-    fs.writeFileSync(packagePath, JSON.stringify(pkg, null, 2));
+    fs.writeFileSync(packagePath, JSON.stringify(pkg, null, 4));
 
     // 2. update manifest.json
     manifest.version = targetVersion;
     const minAppVersion = manifest.minAppVersion;
 
-    fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+    fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 4));
 
     // 3. update versions.json (your logic)
     const versions = JSON.parse(fs.readFileSync(versionsPath, "utf8"));
