@@ -15,7 +15,7 @@
     }
 }
 
-.ovy-highlight {
+.better-vim-highlight {
     --expected-text-height: calc(var(--line-height) * var(--font-text-size));
     --approximate-gap-height: calc(
         (var(--expected-text-height) - var(--font-text-size)) / 4
@@ -26,4 +26,20 @@
     animation-timing-function: ease-out;
     animation-delay: var(--ovy-anim-delay, 0s);
     animation-fill-mode: backwards;
+}
+
+.better-vim-setting-subitem {
+    background-color: #8881;
+}
+
+.better-vim-setting-expandable {
+    flex-wrap: wrap;
+}
+
+.better-vim-setting-sub {
+    flex: 1 1 100%;
+}
+
+.better-vim-setting-sub-hidden {
+    display: none;
 }

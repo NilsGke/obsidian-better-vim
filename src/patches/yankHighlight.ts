@@ -2,25 +2,23 @@ import {
     addYankEventListener,
     removeYankEventListener,
     YankEventDetail,
-} from "src/yankEvent";
-import { Patch } from "src/types";
-import { Vim } from "src/vimTypes";
-import BetterVimPlugin from "src/main";
-import { markViewPlugin } from "src/markViewPlugin";
+} from "src/util/yankEvent";
+import { markViewPlugin } from "../markViewPlugin";
+import { createPatch } from "./patch";
 
 let timeoutHandle = 0;
+let currentDuration = 500;
 
-export function setHighlightCSS(plugin: BetterVimPlugin) {
+export function setHighlightCSS(
+    duration: number,
+    fadeEnabled: boolean,
+    fadeDuration: number,
+) {
     const doc = activeWindow.document;
-    const { yankHighlightDuration, yankHighlightFadeEnabled, yankHighlightFadeDuration } =
-        plugin.settings;
-
-    const duration = yankHighlightFadeEnabled
-        ? yankHighlightFadeDuration
-        : 0;
-    const delay = yankHighlightFadeEnabled
-        ? Math.max(0, yankHighlightDuration - yankHighlightFadeDuration)
-        : yankHighlightDuration;
+    const animDuration = fadeEnabled ? fadeDuration : 0;
+    const delay = fadeEnabled
+        ? Math.max(0, duration - fadeDuration)
+        : duration;
 
     const styleId = "ovy-highlight-style";
     let styleEl = doc.getElementById(styleId) as HTMLStyleElement | null;
@@ -31,7 +29,7 @@ export function setHighlightCSS(plugin: BetterVimPlugin) {
     }
     styleEl.textContent = `
 :root {
-    --ovy-anim-duration: ${duration / 1000}s;
+    --ovy-anim-duration: ${animDuration / 1000}s;
     --ovy-anim-delay: ${delay / 1000}s;
 }`;
 }
@@ -51,23 +49,46 @@ const handler = ({
     activeWindow.clearTimeout(timeoutHandle);
     timeoutHandle = activeWindow.setTimeout(() => {
         plug.cleanYankText(timeoutEditorView);
-    }, plugin.settings.yankHighlightDuration);
+    }, currentDuration);
 };
 
-function patch(_vim: Vim, plugin: BetterVimPlugin) {
-    setHighlightCSS(plugin);
-    addYankEventListener(handler);
-}
-
-function unpatch(_vim: Vim, _plugin: BetterVimPlugin) {
-    const doc = activeWindow.document;
-    const styleEl = doc.getElementById("ovy-highlight-style");
-    if (styleEl) styleEl.remove();
-    removeYankEventListener(handler);
-}
-
-export const yankHighlight = {
-    description: "highlight yanks",
-    patch,
-    unpatch,
-} as const satisfies Patch;
+export default createPatch({
+    defaultSettings: {
+        __patch: {
+            name: "Highlight yanks",
+            description: "highlight yanks with a visual indicator",
+            defaultValue: true,
+        },
+        duration: {
+            name: "Highlight duration (ms)",
+            description:
+                "How long the yank highlight stays visible before fading out",
+            defaultValue: 500,
+        },
+        fadeEnabled: {
+            name: "Fade animation",
+            description: "Enable fade-out animation for the highlight",
+            defaultValue: true,
+        },
+        fadeDuration: {
+            name: "Fade duration (ms)",
+            description: "Duration of the fade-out animation",
+            defaultValue: 400,
+        },
+    },
+    patch: ({ getSetting }) => {
+        currentDuration = getSetting("duration");
+        setHighlightCSS(
+            getSetting("duration"),
+            getSetting("fadeEnabled"),
+            getSetting("fadeDuration"),
+        );
+        addYankEventListener(handler);
+    },
+    unpatch: () => {
+        const doc = activeWindow.document;
+        const styleEl = doc.getElementById("ovy-highlight-style");
+        if (styleEl) styleEl.remove();
+        removeYankEventListener(handler);
+    },
+});
