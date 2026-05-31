@@ -7,18 +7,18 @@ import { markViewPlugin } from "../markViewPlugin";
 import { createPatch } from "./patch";
 
 let timeoutHandle = 0;
-let currentDuration = 500;
+let currentHighlightDuration = 500;
+let currentFadeEnabled = false;
+let currentFadeDuration = 0;
 
 export function setHighlightCSS(
-    duration: number,
+    highlightDuration: number,
     fadeEnabled: boolean,
     fadeDuration: number,
 ) {
     const doc = activeWindow.document;
     const animDuration = fadeEnabled ? fadeDuration : 0;
-    const delay = fadeEnabled
-        ? Math.max(0, duration - fadeDuration)
-        : duration;
+    const delay = highlightDuration;
 
     const styleId = "better-vim-highlight-style";
     let styleEl = doc.getElementById(styleId) as HTMLStyleElement | null;
@@ -47,9 +47,12 @@ const handler = ({
 
     const timeoutEditorView = plugin.activeEditorView;
     activeWindow.clearTimeout(timeoutHandle);
+    const totalDuration = currentFadeEnabled
+        ? currentHighlightDuration + currentFadeDuration
+        : currentHighlightDuration;
     timeoutHandle = activeWindow.setTimeout(() => {
         plug.cleanYankText(timeoutEditorView);
-    }, currentDuration);
+    }, totalDuration);
 };
 
 export default createPatch({
@@ -59,10 +62,10 @@ export default createPatch({
             description: "highlight yanks with a visual indicator",
             defaultValue: true,
         },
-        duration: {
+        highlightDuration: {
             name: "Highlight duration (ms)",
             description:
-                "How long the yank highlight stays visible before fading out",
+                "How long the yank highlight is fully displayed before fading starts",
             defaultValue: 500,
         },
         fadeEnabled: {
@@ -72,14 +75,17 @@ export default createPatch({
         },
         fadeDuration: {
             name: "Fade duration (ms)",
-            description: "Duration of the fade-out animation",
+            description:
+                "Duration of the fade-out animation after the highlight duration",
             defaultValue: 400,
         },
     },
     patch: ({ getSetting }) => {
-        currentDuration = getSetting("duration");
+        currentHighlightDuration = getSetting("highlightDuration");
+        currentFadeEnabled = getSetting("fadeEnabled");
+        currentFadeDuration = getSetting("fadeDuration");
         setHighlightCSS(
-            getSetting("duration"),
+            getSetting("highlightDuration"),
             getSetting("fadeEnabled"),
             getSetting("fadeDuration"),
         );
