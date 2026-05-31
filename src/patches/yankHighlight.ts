@@ -20,7 +20,7 @@ export function setHighlightCSS(
         ? Math.max(0, duration - fadeDuration)
         : duration;
 
-    const styleId = "ovy-highlight-style";
+    const styleId = "better-vim-highlight-style";
     let styleEl = doc.getElementById(styleId) as HTMLStyleElement | null;
     if (!styleEl) {
         styleEl = doc.createElement("style");
@@ -29,8 +29,8 @@ export function setHighlightCSS(
     }
     styleEl.textContent = `
 :root {
-    --ovy-anim-duration: ${animDuration / 1000}s;
-    --ovy-anim-delay: ${delay / 1000}s;
+    --better-vim-anim-duration: ${animDuration / 1000}s;
+    --better-vim-anim-delay: ${delay / 1000}s;
 }`;
 }
 
@@ -87,7 +87,7 @@ export default createPatch({
     },
     unpatch: () => {
         const doc = activeWindow.document;
-        const styleEl = doc.getElementById("ovy-highlight-style");
+        const styleEl = doc.getElementById("better-vim-highlight-style");
         if (styleEl) styleEl.remove();
         removeYankEventListener(handler);
     },

@@ -22,9 +22,9 @@
     );
     padding: var(--approximate-gap-height) 0;
     animation-name: yankedHighlight;
-    animation-duration: var(--ovy-anim-duration, 0.4s);
+    animation-duration: var(--better-vim-anim-duration, 0.4s);
     animation-timing-function: ease-out;
-    animation-delay: var(--ovy-anim-delay, 0s);
+    animation-delay: var(--better-vim-anim-delay, 0s);
     animation-fill-mode: backwards;
 }
 
