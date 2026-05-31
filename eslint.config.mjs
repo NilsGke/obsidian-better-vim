@@ -24,7 +24,7 @@ export default defineConfig(
         "dist",
         "esbuild.config.mjs",
         "eslint.config.js",
-        "version-bump.mjs",
+        "versions.mjs",
         "versions.json",
         "main.js",
     ]),
