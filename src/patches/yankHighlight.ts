@@ -75,8 +75,8 @@ export default createPatch({
         currentHighlightDuration = getSetting("highlightDuration");
         currentFadeDuration = getSetting("fadeDuration");
         setHighlightCSS(
-            getSetting("highlightDuration"),
-            getSetting("fadeDuration"),
+            currentHighlightDuration,
+            currentFadeDuration,
         );
         addYankEventListener(handler);
     },
