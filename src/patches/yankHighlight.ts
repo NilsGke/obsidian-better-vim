@@ -8,16 +8,14 @@ import { createPatch } from "./patch";
 
 let timeoutHandle = 0;
 let currentHighlightDuration = 500;
-let currentFadeEnabled = false;
 let currentFadeDuration = 0;
 
 export function setHighlightCSS(
     highlightDuration: number,
-    fadeEnabled: boolean,
     fadeDuration: number,
 ) {
     const doc = activeWindow.document;
-    const animDuration = fadeEnabled ? fadeDuration : 0;
+    const animDuration = fadeDuration;
     const delay = highlightDuration;
 
     const styleId = "better-vim-highlight-style";
@@ -47,9 +45,7 @@ const handler = ({
 
     const timeoutEditorView = plugin.activeEditorView;
     activeWindow.clearTimeout(timeoutHandle);
-    const totalDuration = currentFadeEnabled
-        ? currentHighlightDuration + currentFadeDuration
-        : currentHighlightDuration;
+    const totalDuration = currentHighlightDuration + currentFadeDuration;
     timeoutHandle = activeWindow.setTimeout(() => {
         plug.cleanYankText(timeoutEditorView);
     }, totalDuration);
@@ -68,11 +64,6 @@ export default createPatch({
                 "How long the yank highlight is fully displayed before fading starts",
             defaultValue: 500,
         },
-        fadeEnabled: {
-            name: "Fade animation",
-            description: "Enable fade-out animation for the highlight",
-            defaultValue: true,
-        },
         fadeDuration: {
             name: "Fade duration (ms)",
             description:
@@ -82,11 +73,9 @@ export default createPatch({
     },
     patch: ({ getSetting }) => {
         currentHighlightDuration = getSetting("highlightDuration");
-        currentFadeEnabled = getSetting("fadeEnabled");
         currentFadeDuration = getSetting("fadeDuration");
         setHighlightCSS(
             getSetting("highlightDuration"),
-            getSetting("fadeEnabled"),
             getSetting("fadeDuration"),
         );
         addYankEventListener(handler);
