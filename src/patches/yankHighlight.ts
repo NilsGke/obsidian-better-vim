@@ -3,12 +3,34 @@ import {
     removeYankEventListener,
     YankEventDetail,
 } from "src/util/yankEvent";
-import { Vim } from "src/vimTypes";
-import BetterVimPlugin from "src/main";
 import { markViewPlugin } from "../markViewPlugin";
 import { createPatch } from "./patch";
 
 let timeoutHandle = 0;
+let currentHighlightDuration = 500;
+let currentFadeDuration = 0;
+
+export function setHighlightCSS(
+    highlightDuration: number,
+    fadeDuration: number,
+) {
+    const doc = activeWindow.document;
+    const animDuration = fadeDuration;
+    const delay = highlightDuration;
+
+    const styleId = "better-vim-highlight-style";
+    let styleEl = doc.getElementById(styleId) as HTMLStyleElement | null;
+    if (!styleEl) {
+        styleEl = doc.createElement("style");
+        styleEl.id = styleId;
+        doc.head.appendChild(styleEl);
+    }
+    styleEl.textContent = `
+:root {
+    --better-vim-anim-duration: ${animDuration / 1000}s;
+    --better-vim-anim-delay: ${delay / 1000}s;
+}`;
+}
 
 const handler = ({
     detail: { operator, text, plugin },
@@ -23,33 +45,45 @@ const handler = ({
 
     const timeoutEditorView = plugin.activeEditorView;
     activeWindow.clearTimeout(timeoutHandle);
+    const totalDuration = currentHighlightDuration + currentFadeDuration;
     timeoutHandle = activeWindow.setTimeout(() => {
         plug.cleanYankText(timeoutEditorView);
-    }, 500);
-};
-
-function patchFn(_vim: Vim, _plugin: BetterVimPlugin) {
-    addYankEventListener(handler);
-}
-
-function unpatch(_vim: Vim, _plugin: BetterVimPlugin) {
-    removeYankEventListener(handler);
-}
-
-export const yankHighlight = {
-    description: "highlight yanks",
-    defaultEnabled: true,
-    patch: patchFn,
-    unpatch,
+    }, totalDuration);
 };
 
 export default createPatch({
     defaultSettings: {
         __patch: {
-            name: "Highlith yanks",
+            name: "Highlight yanks",
+            description: "highlight yanks with a visual indicator",
             defaultValue: true,
         },
+        highlightDuration: {
+            name: "Highlight duration (ms)",
+            description:
+                "How long the yank highlight is fully displayed before fading starts",
+            defaultValue: 500,
+        },
+        fadeDuration: {
+            name: "Fade duration (ms)",
+            description:
+                "Duration of the fade-out animation after the highlight duration",
+            defaultValue: 400,
+        },
     },
-    patch: () => addYankEventListener(handler),
-    unpatch: () => removeYankEventListener(handler),
+    patch: ({ getSetting }) => {
+        currentHighlightDuration = getSetting("highlightDuration");
+        currentFadeDuration = getSetting("fadeDuration");
+        setHighlightCSS(
+            currentHighlightDuration,
+            currentFadeDuration,
+        );
+        addYankEventListener(handler);
+    },
+    unpatch: () => {
+        const doc = activeWindow.document;
+        const styleEl = doc.getElementById("better-vim-highlight-style");
+        if (styleEl) styleEl.remove();
+        removeYankEventListener(handler);
+    },
 });

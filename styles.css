@@ -8,17 +8,9 @@
             0.6
         );
     }
-    50% {
-        color: var(--text-on-accent);
-        background-color: hsl(
-            var(--accent-h),
-            var(--accent-s),
-            var(--accent-l),
-            0.6
-        );
-    }
 
     100% {
+        color: inherit;
         background-color: transparent;
     }
 }
@@ -29,7 +21,11 @@
         (var(--expected-text-height) - var(--font-text-size)) / 4
     );
     padding: var(--approximate-gap-height) 0;
-    animation: yankedHighlight 0.4s ease-out;
+    animation-name: yankedHighlight;
+    animation-duration: var(--better-vim-anim-duration, 0.4s);
+    animation-timing-function: ease-out;
+    animation-delay: var(--better-vim-anim-delay, 0s);
+    animation-fill-mode: backwards;
 }
 
 .better-vim-setting-subitem {
