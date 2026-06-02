@@ -1,7 +1,7 @@
 {
     "id": "better-vim",
     "name": "Better Vim",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "minAppVersion": "0.15.0",
     "description": "Fixes some annoyances with the built in vim mode.",
     "author": "Nils Goeke",
