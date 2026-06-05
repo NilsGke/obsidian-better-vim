@@ -1,6 +1,5 @@
 import { Vim, VimActionArgs, VimCodeMirrorAdapter } from "src/vimTypes";
 import { createPatch } from "./patch";
-
 function patchListNewLine({ vim }: { vim: Vim }) {
     const insertLine = (
         codeMirrorAdapter: VimCodeMirrorAdapter,
@@ -18,7 +17,7 @@ function patchListNewLine({ vim }: { vim: Vim }) {
 
         const indentMatch = lineText.match(/^(\s*)/);
         const indent = indentMatch?.[1] ?? "";
-
+        const checkboxMatch = lineText.match(/^(\s*)([-*+])\s+\[[ xX]\]\s+/);
         const bulletMatch = lineText.match(/^(\s*)([-*+])\s+/);
         const numberMatch = lineText.match(/^(\s*)(\d+)([.)])\s+/);
 
@@ -42,6 +41,15 @@ function patchListNewLine({ vim }: { vim: Vim }) {
                 } else {
                     insertText += `${indent}${Math.max(1, num - 1)}${delim} \n`;
                 }
+        } else if (checkboxMatch) {
+            // checkbox list — always insert an empty unchecked checkbox
+            const bullet = checkboxMatch[2];
+            const prefix = `${indent}${bullet} [ ] `;
+            if (direction === "below")
+                insertText = `\n${prefix}`.repeat(repeat);
+            else {
+                insertText = `${prefix}\n`.repeat(repeat);
+            }
         } else if (bulletMatch) {
             // bullet point
             const bullet = bulletMatch[2] ?? "";
