@@ -44,9 +44,9 @@ const handler = ({
     plug.setYankText(text, plugin.activeEditorView);
 
     const timeoutEditorView = plugin.activeEditorView;
-    activeWindow.clearTimeout(timeoutHandle);
+    window.clearTimeout(timeoutHandle);
     const totalDuration = currentHighlightDuration + currentFadeDuration;
-    timeoutHandle = activeWindow.setTimeout(() => {
+    timeoutHandle = window.setTimeout(() => {
         plug.cleanYankText(timeoutEditorView);
     }, totalDuration);
 };
@@ -74,10 +74,7 @@ export default createPatch({
     patch: ({ getSetting }) => {
         currentHighlightDuration = getSetting("highlightDuration");
         currentFadeDuration = getSetting("fadeDuration");
-        setHighlightCSS(
-            currentHighlightDuration,
-            currentFadeDuration,
-        );
+        setHighlightCSS(currentHighlightDuration, currentFadeDuration);
         addYankEventListener(handler);
     },
     unpatch: () => {
