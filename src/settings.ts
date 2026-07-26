@@ -1,4 +1,10 @@
-import { App, PluginSettingTab, Setting } from "obsidian";
+import {
+    App,
+    PluginSettingTab,
+    requireApiVersion,
+    Setting,
+    type SettingDefinitionItem,
+} from "obsidian";
 import { patchesMap } from "./patches";
 import { createGetSetting, SettingValueFor } from "./patches/patch";
 import ExamplePlugin from "./main";
@@ -45,6 +51,165 @@ export class SettingsTab extends PluginSettingTab {
         super(app, plugin);
         this.plugin = plugin;
         this.#vim = vim;
+    }
+
+    getSettingDefinitions(): SettingDefinitionItem[] {
+        if (!requireApiVersion("1.13.0")) return [];
+
+        return typeSafeObjectEntries(patchesMap).map(
+            <K extends keyof PatchMap>([key, patch]: [K, PatchMap[K]]) => {
+                const rootSetting = patch.defaultSettings.__patch;
+                return {
+                    name: rootSetting.name,
+                    desc:
+                        "description" in rootSetting
+                            ? rootSetting.description
+                            : undefined,
+                    aliases: typeSafeObjectEntries(patch.defaultSettings)
+                        .filter(([settingKey]) => settingKey !== "__patch")
+                        .flatMap(([, setting]) => [
+                            setting.name,
+                            ...("description" in setting
+                                ? [setting.description]
+                                : []),
+                        ]),
+                    render: (setting: Setting) => {
+                        this.renderPatchSetting(setting, key, patch);
+                    },
+                };
+            },
+        );
+    }
+
+    private renderPatchSetting<K extends keyof PatchMap>(
+        setting: Setting,
+        key: K,
+        patch: PatchMap[K],
+    ): void {
+        const settingValues = this.plugin.settings[key];
+        const settings = patch.defaultSettings;
+        const { sub } = configureSetting({
+            expandable: Object.keys(settings).length > 1,
+            value: settingValues.__patch,
+            setting,
+            name: settings.__patch.name,
+            desc:
+                "description" in settings.__patch
+                    ? settings.__patch.description
+                    : null,
+            onToggle: async (value) => {
+                if (value)
+                    patch.patch({
+                        vim: this.#vim,
+                        plugin: this.plugin,
+                        getSetting: createGetSetting(
+                            patch.defaultSettings,
+                            this.plugin.settings[key],
+                        ),
+                    });
+                else
+                    patch.unpatch({
+                        vim: this.#vim,
+                        plugin: this.plugin,
+                    });
+
+                this.plugin.settings[key].__patch = value;
+                await this.plugin.saveSettings();
+            },
+        });
+
+        const repatch = () => {
+            patch.unpatch({
+                vim: this.#vim,
+                plugin: this.plugin,
+            });
+            patch.patch({
+                vim: this.#vim,
+                plugin: this.plugin,
+                getSetting: createGetSetting(
+                    patch.defaultSettings,
+                    this.plugin.settings[key],
+                ),
+            });
+        };
+
+        typeSafeObjectEntries(patch.defaultSettings).forEach(
+            ([_settingKey, { defaultValue, name }]) => {
+                if (_settingKey === "__patch" || !sub) return;
+                const settingKey = _settingKey as keyof typeof settings;
+                const option = settings[settingKey];
+                const childSetting = new Setting(sub).setName(name);
+
+                if ("description" in option)
+                    childSetting.setDesc(option.description);
+
+                childSetting.settingEl.classList.add(
+                    "better-vim-setting-subitem",
+                );
+
+                switch (typeof defaultValue) {
+                    case "boolean":
+                        childSetting.addToggle((toggle) =>
+                            toggle
+                                .setValue(
+                                    Boolean(
+                                        this.plugin.settings[key][settingKey],
+                                    ),
+                                )
+                                .onChange(async (value) => {
+                                    this.plugin.settings[key][settingKey] =
+                                        value;
+                                    repatch();
+                                    await this.plugin.saveSettings();
+                                }),
+                        );
+                        break;
+
+                    case "string":
+                        childSetting.addText((text) =>
+                            text
+                                .setValue(
+                                    String(
+                                        this.plugin.settings[key][settingKey],
+                                    ),
+                                )
+                                .onChange(async (value) => {
+                                    Reflect.set(
+                                        this.plugin.settings[key],
+                                        settingKey,
+                                        value,
+                                    );
+                                    repatch();
+                                    await this.plugin.saveSettings();
+                                }),
+                        );
+                        break;
+                    case "number":
+                        childSetting.addText((text) =>
+                            text
+                                .setValue(
+                                    String(
+                                        this.plugin.settings[key][settingKey],
+                                    ),
+                                )
+                                .onChange(async (value) => {
+                                    const num = parseInt(value);
+                                    if (isNaN(num)) return;
+                                    Reflect.set(
+                                        this.plugin.settings[key],
+                                        settingKey,
+                                        num,
+                                    );
+                                    repatch();
+                                    await this.plugin.saveSettings();
+                                }),
+                        );
+                        break;
+                    default:
+                        break;
+                }
+            },
+        );
     }
 
     display(): void {
@@ -199,16 +364,41 @@ function createSetting({
     container: HTMLElement;
     name: string;
     desc: string | null;
-    onToggle: (enabled: boolean) => void;
+    onToggle: (enabled: boolean) => void | Promise<void>;
 }) {
-    const setting = new Setting(container).setName(name);
+    return configureSetting({
+        expandable,
+        value,
+        setting: new Setting(container),
+        name,
+        desc,
+        onToggle,
+    });
+}
+
+function configureSetting({
+    expandable,
+    value,
+    setting,
+    name,
+    desc,
+    onToggle,
+}: {
+    expandable: boolean;
+    value: boolean;
+    setting: Setting;
+    name: string;
+    desc: string | null;
+    onToggle: (enabled: boolean) => void | Promise<void>;
+}) {
+    setting.setName(name);
     if (desc) setting.setDesc(desc);
 
     setting.addToggle((toggle) =>
-        toggle.setValue(value).onChange((v) => {
+        toggle.setValue(value).onChange(async (v) => {
             if (expandable)
                 sub.classList.toggle("better-vim-setting-sub-hidden", !v);
-            onToggle(v);
+            await onToggle(v);
         }),
     );
     if (!expandable) return { setting };
