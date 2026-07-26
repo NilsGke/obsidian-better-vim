@@ -67,7 +67,12 @@ export class SettingsTab extends PluginSettingTab {
                             : undefined,
                     aliases: typeSafeObjectEntries(patch.defaultSettings)
                         .filter(([settingKey]) => settingKey !== "__patch")
-                        .map(([, setting]) => setting.name),
+                        .flatMap(([, setting]) => [
+                            setting.name,
+                            ...("description" in setting
+                                ? [setting.description]
+                                : []),
+                        ]),
                     render: (setting: Setting) => {
                         this.renderPatchSetting(setting, key, patch);
                     },
