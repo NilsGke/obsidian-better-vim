@@ -89,7 +89,7 @@ export class SettingsTab extends PluginSettingTab {
                 "description" in settings.__patch
                     ? settings.__patch.description
                     : null,
-            onToggle: (value) => {
+            onToggle: async (value) => {
                 if (value)
                     patch.patch({
                         vim: this.#vim,
@@ -106,7 +106,7 @@ export class SettingsTab extends PluginSettingTab {
                     });
 
                 this.plugin.settings[key].__patch = value;
-                void this.plugin.saveSettings();
+                await this.plugin.saveSettings();
             },
         });
 
@@ -356,7 +356,7 @@ function createSetting({
     container: HTMLElement;
     name: string;
     desc: string | null;
-    onToggle: (enabled: boolean) => void;
+    onToggle: (enabled: boolean) => void | Promise<void>;
 }) {
     return configureSetting({
         expandable,
@@ -381,16 +381,16 @@ function configureSetting({
     setting: Setting;
     name: string;
     desc: string | null;
-    onToggle: (enabled: boolean) => void;
+    onToggle: (enabled: boolean) => void | Promise<void>;
 }) {
     setting.setName(name);
     if (desc) setting.setDesc(desc);
 
     setting.addToggle((toggle) =>
-        toggle.setValue(value).onChange((v) => {
+        toggle.setValue(value).onChange(async (v) => {
             if (expandable)
                 sub.classList.toggle("better-vim-setting-sub-hidden", !v);
-            onToggle(v);
+            await onToggle(v);
         }),
     );
     if (!expandable) return { setting };
