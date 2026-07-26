@@ -65,6 +65,9 @@ export class SettingsTab extends PluginSettingTab {
                         "description" in rootSetting
                             ? rootSetting.description
                             : undefined,
+                    aliases: typeSafeObjectEntries(patch.defaultSettings)
+                        .filter(([settingKey]) => settingKey !== "__patch")
+                        .map(([, setting]) => setting.name),
                     render: (setting: Setting) => {
                         this.renderPatchSetting(setting, key, patch);
                     },
