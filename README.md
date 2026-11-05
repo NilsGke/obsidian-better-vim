@@ -8,6 +8,7 @@ This plugin adds some handy features to obsidians built in vim mode.
 - insert bullet point on new line
 - sync system clipboard (yank & paste)
 - visual-line motions for j/k/0/$/_/A/I/V (optional)
+- tab out of brackets/quotes in insert mode (inspired by [abecodes/tabout.nvim](https://github.com/abecodes/tabout.nvim)). Press `Tab` to jump past the next closing `)]}>"` + `` ` `` on the line, `Shift-Tab` to jump back; characters and behavior are configurable
 
 If you miss a feature please open a issue.
 

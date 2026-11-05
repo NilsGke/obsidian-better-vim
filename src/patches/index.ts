@@ -2,6 +2,7 @@ import listNewLinePatch from "./listNewLine";
 import syncSystemClipboardPatch from "./syncSystemClipboard";
 import yankHighlightPatch from "./yankHighlight";
 import visualLineMotionsPatch from "./visualLineMotions";
+import taboutPatch from "./tabout";
 import { PatchSetting, Patch } from "./patch";
 
 type MinimalPachType = Patch<{
@@ -13,6 +14,7 @@ export const patchesMap = {
     "sync-system-clipboard": syncSystemClipboardPatch,
     "yank-highlight": yankHighlightPatch,
     "visual-line-motions": visualLineMotionsPatch,
+    tabout: taboutPatch,
 } as const satisfies Record<string, MinimalPachType>;
 
 export const patches = Object.values(patchesMap) satisfies MinimalPachType[];

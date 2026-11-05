@@ -83,4 +83,5 @@ export default createPatch({
         if (styleEl) styleEl.remove();
         removeYankEventListener(handler);
     },
+    extension: markViewPlugin,
 });

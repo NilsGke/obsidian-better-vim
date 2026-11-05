@@ -1,9 +1,26 @@
 import { EditorView } from "@codemirror/view";
 
+/**
+ * Minimal shape of the CodeMirror 5 compatibility adapter that
+ * `@replit/codemirror-vim` keeps for each `EditorView`. We only need the
+ * attached vim state to tell whether the editor is in insert mode.
+ */
+export interface VimCm5Adapter {
+    state?: {
+        vim?: {
+            insertMode?: boolean;
+            mode?: string;
+            [key: string]: unknown;
+        };
+    };
+    [key: string]: unknown;
+}
+
 declare global {
     interface Window {
         CodeMirrorAdapter: {
             Vim: Vim;
+            getCM?: (view: EditorView) => VimCm5Adapter | null;
         };
     }
 }

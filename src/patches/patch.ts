@@ -1,3 +1,4 @@
+import { Extension } from "@codemirror/state";
 import BetterVimPlugin from "src/main";
 import { Vim } from "src/vimTypes";
 
@@ -50,6 +51,7 @@ export class Patch<SettingsMap extends SettingsMapType> {
             ) => SettingValueFor<SettingsMap, Key>;
         }) => void,
         public unpatch: (params: { vim: Vim; plugin: BetterVimPlugin }) => void,
+        public extension?: Extension,
     ) {}
 }
 
@@ -63,9 +65,11 @@ export const createPatch = <SettingsMap extends SettingsMapType>(options: {
         ) => SettingValueFor<SettingsMap, Key>;
     }) => void;
     unpatch: (params: { vim: Vim; plugin: BetterVimPlugin }) => void;
+    extension?: Extension;
 }) =>
     new Patch<SettingsMap>(
         options.defaultSettings,
         options.patch,
         options.unpatch,
+        options.extension,
     );
