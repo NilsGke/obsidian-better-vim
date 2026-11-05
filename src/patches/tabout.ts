@@ -1,6 +1,5 @@
 import { createPatch } from "./patch";
-import { buildPairMaps, taboutConfig } from "../tabout";
-import { taboutExtension } from "src/tabout";
+import { buildPairMaps, taboutConfig, taboutExtension } from "../tabout";
 
 /**
  * Tab-out (inspired by https://github.com/abecodes/tabout.nvim).
