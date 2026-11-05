@@ -1,5 +1,5 @@
 import { createPatch } from "./patch";
-import { taboutConfig } from "../tabout";
+import { buildPairMaps, taboutConfig } from "../tabout";
 import { taboutExtension } from "src/tabout";
 
 /**
@@ -45,11 +45,15 @@ export default createPatch({
     },
 
     patch: ({ getSetting }) => {
+        const newOpening = getSetting("openingChars");
+        const newClosing = getSetting("closingChars");
+
         taboutConfig.shiftTab = getSetting("shiftTab");
-        taboutConfig.closing = getSetting("closingChars");
-        taboutConfig.opening = getSetting("openingChars");
+        taboutConfig.opening = newOpening;
+        taboutConfig.closing = newClosing;
         taboutConfig.insertModeOnly = getSetting("insertModeOnly");
         taboutConfig.enabled = true;
+        taboutConfig._pairs = buildPairMaps(newOpening, newClosing);
     },
 
     unpatch: () => {

@@ -1,6 +1,37 @@
 import { EditorSelection, Extension, Prec } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 
+type Pairs = {
+    openToClose: Map<string, string>;
+    closeToOpen: Map<string, string>;
+    symmetric: Set<string>;
+};
+
+export function buildPairMaps(opening: string, closing: string): Pairs {
+    const openToClose = new Map<string, string>();
+    const closeToOpen = new Map<string, string>();
+    const symmetric = new Set<string>();
+
+    const length = Math.min(opening.length, closing.length);
+    for (let i = 0; i < length; i++) {
+        const openingChar = opening[i];
+        const closingChar = closing[i];
+        if (openingChar === closingChar) symmetric.add(openingChar);
+        else {
+            openToClose.set(openingChar, closingChar);
+            closeToOpen.set(closingChar, openingChar);
+        }
+    }
+    return { openToClose, closeToOpen, symmetric };
+}
+
+type Context = {
+    position: number;
+    opener: string;
+    closer: string;
+    isSymmetric: boolean;
+};
+
 /**
  * Runtime configuration for the tab-out feature.
  * */
@@ -11,18 +42,24 @@ export type TaboutConfig = {
     shiftTab: boolean;
     /** Only act while in vim insert mode. */
     insertModeOnly: boolean;
-    /** Characters Tab jumps past (searched to the right, on the current line). */
-    closing: string;
     /** Characters Shift-Tab jumps before (searched to the left). */
     opening: string;
+    /** Characters Tab jumps past (searched to the right, on the current line). */
+    closing: string;
+    /** Stores pairs derived from opening and closing chars. */
+    _pairs: Pairs;
 };
+
+const DEFAULT_CLOSING = ")]}>\"'`";
+const DEFAULT_OPENING = "([{<\"'`";
 
 export const taboutConfig: TaboutConfig = {
     enabled: false,
     shiftTab: true,
     insertModeOnly: true,
-    closing: ")]}>\"'`",
-    opening: "([{<\"'`",
+    opening: DEFAULT_OPENING,
+    closing: DEFAULT_CLOSING,
+    _pairs: buildPairMaps(DEFAULT_OPENING, DEFAULT_CLOSING),
 };
 
 /**
@@ -48,27 +85,83 @@ function isInsertMode(view: EditorView): boolean {
     return !hasFatCursor;
 }
 
+function enclosingContext(text: string, col: number): Context | null {
+    const { openToClose, closeToOpen, symmetric } = taboutConfig._pairs;
+    const stack: Context[] = [];
+
+    for (let i = 0; i < col; i++) {
+        const c = text[i];
+        const top = stack[stack.length - 1];
+        if (symmetric.has(c)) {
+            if (top && top.isSymmetric && top.opener === c) stack.pop();
+            else
+                stack.push({
+                    position: i,
+                    opener: c,
+                    closer: c,
+                    isSymmetric: true,
+                });
+        } else if (openToClose.has(c)) {
+            stack.push({
+                position: i,
+                opener: c,
+                closer: openToClose.get(c)!,
+                isSymmetric: false,
+            });
+        } else if (closeToOpen.has(c)) {
+            if (top && !top.isSymmetric && top.closer === c) stack.pop();
+        }
+    }
+    return stack[stack.length - 1] || null;
+}
+
+function forwardTarget(
+    text: string,
+    col: number,
+    context: Context,
+): number | null {
+    if (context.isSymmetric) {
+        const index = text.indexOf(context.closer, col);
+        return index === -1 ? null : index + 1;
+    }
+    let depth = 0;
+    for (let i = col; i < text.length; i++) {
+        const c = text[i];
+        if (c === context.opener) depth++;
+        else if (c === context.closer) {
+            if (depth === 0) return i + 1;
+            else depth--;
+        }
+    }
+    return null;
+}
+
+/** Jumps cursor to specified column in current line */
+function jumpTo(view: EditorView, target: number) {
+    view.dispatch({
+        selection: EditorSelection.cursor(target),
+        scrollIntoView: true,
+    });
+    return true;
+}
+
 /** Tab forward: jump past the next closing character on the line. */
 function tabOut(view: EditorView): boolean {
     const sel = view.state.selection.main;
     if (!sel.empty) return false;
 
-    const pos = sel.head;
-    const line = view.state.doc.lineAt(pos);
-    const offset = pos - line.from;
+    const line = view.state.doc.lineAt(sel.head);
+    const cursorCol = sel.head - line.from;
 
-    for (let i = offset; i < line.text.length; i++) {
-        if (taboutConfig.closing.includes(line.text[i])) {
-            const target = line.from + i + 1;
-            view.dispatch({
-                selection: EditorSelection.cursor(target),
-                scrollIntoView: true,
-            });
-            return true;
-        }
-    }
+    const context = enclosingContext(line.text, cursorCol);
+    if (!context) return false;
 
-    return false;
+    const target = forwardTarget(line.text, cursorCol, context);
+    console.log({ line, cursorCol, context, target });
+    if (target === null) return false;
+
+    console.log({ line, cursorCol, context, target });
+    return jumpTo(view, line.from + target);
 }
 
 /** Shift-Tab: jump before the previous opening character on the line. */
@@ -76,22 +169,13 @@ function tabIn(view: EditorView): boolean {
     const sel = view.state.selection.main;
     if (!sel.empty) return false;
 
-    const pos = sel.head;
-    const line = view.state.doc.lineAt(pos);
-    const offset = pos - line.from;
+    const line = view.state.doc.lineAt(sel.head);
+    const cursorCol = sel.head - line.from;
 
-    for (let i = offset - 1; i >= 0; i--) {
-        if (taboutConfig.opening.includes(line.text[i])) {
-            const target = line.from + i;
-            view.dispatch({
-                selection: EditorSelection.cursor(target),
-                scrollIntoView: true,
-            });
-            return true;
-        }
-    }
+    const context = enclosingContext(line.text, cursorCol);
+    if (!context) return false;
 
-    return false;
+    return jumpTo(view, line.from + context.position);
 }
 
 function handle(view: EditorView, direction: "forward" | "backward"): boolean {
